@@ -1,0 +1,20 @@
+{
+    "name": "apility/payment",
+    "autoload": {
+        "psr-4": {
+            "Apility\\Payment\\": "src/Apility/Payment"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "require": {
+        "illuminate/support": "^8.0|^9.0",
+        "illuminate/routing": "^8.0|^9.0",
+        "chillerlan/php-qrcode": "^4.3",
+        "netflex/commerce": "^4.0",
+        "apility/seotools": "^1.0",
+        "apility/nets-easy": "^2.2",
+        "netflex/renderer": "^4.0"
+    }
+}

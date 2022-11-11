@@ -1,0 +1,129 @@
+<?php
+
+namespace Apility\Payment\Concerns;
+
+use Apility\Payment\Contracts\Payment as PaymentContract;
+use Apility\Payment\Routing\Payment as RoutingPayment;
+
+use Illuminate\Support\Str;
+
+use Nets\Easy\Payment;
+
+use Netflex\Commerce\Contracts\CartItem;
+use Netflex\Commerce\Contracts\Order;
+
+trait CreatesNetsEasyPayments
+{
+    protected function createNetsEasyPayment(Order $order, string $completePaymentButtonText = 'pay'): Payment
+    {
+        $netsEasyPaymentConfig = array_filter([
+            'checkout' => $this->createNetsEasyCheckoutPayload($order, $completePaymentButtonText),
+            'order' => $this->createNetsEasyOrderPayload($order),
+            'paymentMethods' => $this->createNetsEasyPaymentMethodsPayload($order),
+            'notifications' => $this->createNetsEasyNotificationsPayload($order),
+        ]);
+
+        return Payment::create($netsEasyPaymentConfig);
+    }
+
+    protected function createNetsEasyCheckoutPayload(Order $order, string $completePaymentButtonText = 'pay'): array
+    {
+        /** @var PaymentContract&CreatesNetsEasyPayments $this */
+
+        $processor = $this->getProcessor();
+
+        return [
+            'integrationType' => 'HostedPaymentPage',
+            'returnUrl' => RoutingPayment::route('callback', ['order' => $order, 'processor' => $this->getProcessor()]),
+            'termsUrl' => '_____________________________________________',
+            'merchantHandlesConsumerData' => true,
+            'merchantHandlesShippingCost' => true,
+            'charge' => true,
+            'consumer' => array_filter([
+                'email' => $order->getOrderCustomerEmail(),
+                'phoneNumber' => $this->getNetsEasyOrderPhoneNumberPayload($order),
+                'privatePerson' => [
+                    'firstName' => $order->getOrderCustomerFirstname(),
+                    'lastName' => $order->getOrderCustomerSurname(),
+                ]
+            ]),
+            'appearance' => [
+                'textOptions' => [
+                    'completePaymentButtonText' => $completePaymentButtonText
+                ]
+            ],
+        ];
+    }
+
+    protected function getNetsEasyOrderPhoneNumberPayload(Order $order): ?array
+    {
+        if ($phone = $order->getOrderCustomerPhone()) {
+            if (Str::length($phone) === 8) {
+                return [
+                    'prefix' => '+47',
+                    'number' => $phone
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    protected function createNetsEasyOrderPayload(Order $order): array
+    {
+        return [
+            'currency' => $order->getOrderCurrency(),
+            'reference' => $order->getOrderSecret(),
+            'amount' => (int) number_format(floatval($order->getOrderTotal()), 2, '', ''),
+            'items' => array_map(fn (CartItem $item) => [
+                'reference' => $item->getCartItemProductId(),
+                'name' => $this->getNetsEasyCartItemName($item),
+                'quantity' => $item->getCartItemQuantity(),
+                'unit' => 'x',
+                'unitPrice' => (int) number_format(floatval($item->getCartItemPrice() / $item->getCartItemTaxRate()), 2, '', ''),
+                'taxRate' => (int) number_format(($item->getCartItemTaxRate() - 1) * 10000, 0, '', ''), // Taxrate (e.g 25.0 in this case),
+                'taxAmount' => (int) number_format(floatval($item->getCartItemTax()), 2, '', ''), // The total tax amount for this item in cents,
+                'grossTotalAmount' => (int) number_format(floatval($item->getCartItemTotal()), 2, '', ''), // Total for this item with tax in cents,
+                'netTotalAmount' => (int) number_format(floatval($item->getCartItemSubtotal()), 2, '', ''), // Total for this item without tax in cents
+            ], $order->getOrderCartItems())
+        ];
+    }
+
+    protected function getNetsEasyCartItemName(CartItem $item): string
+    {
+        $name = $item->getCartItemProductName();
+
+        if ($variant = $item->getCartItemVariantName()) {
+            $name = "$name ($variant)";
+        }
+
+        return $name;
+    }
+
+    protected function createNetsEasyPaymentMethodsPayload(Order $order): ?array
+    {
+        return [];
+    }
+
+    protected function createNetsEasyNotificationsPayload(Order $order): ?array
+    {
+        /* if (env('APP_ENV') === 'master') {
+            $netsEasyPaymentConfig['notifications'] = [
+                'webHooks' => [
+                    [
+                        'eventName' => 'payment.checkout.completed',
+                        'url' => url(route('payment.callback', $order)),
+                        'authorization' => $order->secret,
+                        'headers' => [
+                            [
+                                'webhook' => 'payment.checkout.completed'
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+        } */
+
+        return null;
+    }
+}
