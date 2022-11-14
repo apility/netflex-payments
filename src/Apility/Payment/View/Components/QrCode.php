@@ -29,7 +29,6 @@ class QrCode extends Component
 
     public function render()
     {
-        dd($this->qr);
         return view('payment::components.qr-code', [
             'qr' => $this->qr()
         ]);
