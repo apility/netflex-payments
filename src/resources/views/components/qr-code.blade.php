@@ -1,6 +1,6 @@
 <div class="d-flex flex-column">
     <img
-        class="img-fluid"
+        class="img-fluid {{ $attributes->get('class') }}"
         src="{{ $qr }}"
         width="110"
         height="110"
