@@ -4,11 +4,13 @@ namespace Apility\Payment\Facades;
 
 use Apility\Payment\Contracts\Payment as PaymentContract;
 use Apility\Payment\Contracts\PaymentProcessor;
+use Apility\Payment\Processors\AbstractProcessor;
 use Apility\Payment\Processors\NullProcessor;
 
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\App;
 use Netflex\Commerce\Contracts\Order;
+use Netflex\Commerce\Contracts\Payment as CommercePayment;
 
 /**
  * @method static \Apility\Payment\Contracts\Payment create(\Netflex\Commerce\Contracts\Order $order)
@@ -20,11 +22,20 @@ class Payment extends Facade
         return 'payment.processor';
     }
 
+    public static function resolve(CommercePayment $payment): ?PaymentContract
+    {
+        if ($processor = static::processor($payment->getPaymentMethod())) {
+            return $processor->find($payment->getTransactionId());
+        }
+
+        return null;
+    }
+
     public static function processor(string $processor): ?PaymentProcessor
     {
         $processor = App::make('payment.processors.' . $processor);
 
-        return new class($processor) implements PaymentProcessor
+        return new class($processor) extends AbstractProcessor
         {
             protected PaymentProcessor $processor;
 
@@ -36,11 +47,6 @@ class Payment extends Facade
             public function getProcessor(): string
             {
                 return $this->processor->getProcessor();
-            }
-
-            public function setup(string $driver, array $config)
-            {
-                $this->processor->setup($driver, $config);
             }
 
             public function create(Order $order): PaymentContract

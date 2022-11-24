@@ -14,6 +14,4 @@ interface PaymentProcessor extends UrlRoutable
     public function create(Order $order): Payment;
 
     public function find($paymentId): ?Payment;
-
-    /* public function charge(Payment $payment): Payment; */
 }

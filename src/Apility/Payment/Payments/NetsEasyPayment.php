@@ -37,16 +37,7 @@ class NetsEasyPayment extends AbstractPayment
 
     public function getTransactionId(): string
     {
-        if ($chargeId = $this->chargeId) {
-            return $chargeId;
-        }
-
-        foreach ($this->payment->charges ?? [] as $charge) {
-            $this->chargeId = $charge['chargeId'];
-            return $this->chargeId;
-        }
-
-        return '';
+        return $this->payment->paymentId;
     }
 
     public function getPaymentDate(): DateTimeInterface
