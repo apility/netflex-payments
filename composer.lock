@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "apility/nets-easy",
-            "version": "v2.2.0",
+            "version": "v2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/apility/nets-easy-php.git",
-                "reference": "c7edfa23183e6213bcd49e9e632a208d176995b6"
+                "reference": "384931e88555d8d5cf6d94664a19384e1bebfdf3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/apility/nets-easy-php/zipball/c7edfa23183e6213bcd49e9e632a208d176995b6",
-                "reference": "c7edfa23183e6213bcd49e9e632a208d176995b6",
+                "url": "https://api.github.com/repos/apility/nets-easy-php/zipball/384931e88555d8d5cf6d94664a19384e1bebfdf3",
+                "reference": "384931e88555d8d5cf6d94664a19384e1bebfdf3",
                 "shasum": ""
             },
             "require": {
@@ -45,9 +45,9 @@
             ],
             "support": {
                 "issues": "https://github.com/apility/nets-easy-php/issues",
-                "source": "https://github.com/apility/nets-easy-php/tree/v2.2.0"
+                "source": "https://github.com/apility/nets-easy-php/tree/v2.3.0"
             },
-            "time": "2022-06-15T08:39:39+00:00"
+            "time": "2022-11-24T16:50:27+00:00"
         },
         {
             "name": "apility/seotools",
@@ -2012,21 +2012,21 @@
         },
         {
             "name": "netflex/api",
-            "version": "4.19.5",
+            "version": "4.19.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/netflex-sdk/api.git",
-                "reference": "7b6cbb30ff7f94b2a8a24e1366515abe8241542e"
+                "reference": "d8d5f1b9421858eec52602d64621b426800d6ce8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/netflex-sdk/api/zipball/7b6cbb30ff7f94b2a8a24e1366515abe8241542e",
-                "reference": "7b6cbb30ff7f94b2a8a24e1366515abe8241542e",
+                "url": "https://api.github.com/repos/netflex-sdk/api/zipball/d8d5f1b9421858eec52602d64621b426800d6ce8",
+                "reference": "d8d5f1b9421858eec52602d64621b426800d6ce8",
                 "shasum": ""
             },
             "require": {
                 "illuminate/support": "^8.0",
-                "netflex/http": "^4.19.5",
+                "netflex/http": "^4.19.6",
                 "php": "^7.4|^8.0"
             },
             "require-dev": {
@@ -2063,29 +2063,29 @@
             ],
             "description": "Netflex API library",
             "support": {
-                "source": "https://github.com/netflex-sdk/api/tree/4.19.5"
+                "source": "https://github.com/netflex-sdk/api/tree/4.19.6"
             },
-            "time": "2022-11-23T16:48:18+00:00"
+            "time": "2022-11-23T19:47:45+00:00"
         },
         {
             "name": "netflex/commerce",
-            "version": "4.19.5",
+            "version": "4.19.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/netflex-sdk/commerce.git",
-                "reference": "353f6ca7d03dedae5c48e216005e8ec8ca1f3ab4"
+                "reference": "2ebe81c9dc1f367947a9d50e0905b2d5313d3b1a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/netflex-sdk/commerce/zipball/353f6ca7d03dedae5c48e216005e8ec8ca1f3ab4",
-                "reference": "353f6ca7d03dedae5c48e216005e8ec8ca1f3ab4",
+                "url": "https://api.github.com/repos/netflex-sdk/commerce/zipball/2ebe81c9dc1f367947a9d50e0905b2d5313d3b1a",
+                "reference": "2ebe81c9dc1f367947a9d50e0905b2d5313d3b1a",
                 "shasum": ""
             },
             "require": {
                 "illuminate/support": "^8.0",
-                "netflex/api": "^4.19.5",
-                "netflex/query-builder": "^4.19.5",
-                "netflex/support": "^4.19.5",
+                "netflex/api": "^4.19.6",
+                "netflex/query-builder": "^4.19.6",
+                "netflex/support": "^4.19.6",
                 "php": "^7.4|^8.0"
             },
             "require-dev": {
@@ -2123,13 +2123,13 @@
             ],
             "description": "Netflex Commerce library",
             "support": {
-                "source": "https://github.com/netflex-sdk/commerce/tree/4.19.5"
+                "source": "https://github.com/netflex-sdk/commerce/tree/4.19.6"
             },
-            "time": "2022-11-23T16:48:11+00:00"
+            "time": "2022-11-23T19:47:36+00:00"
         },
         {
             "name": "netflex/http",
-            "version": "4.19.5",
+            "version": "4.19.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/netflex-sdk/http.git",
@@ -2186,16 +2186,16 @@
         },
         {
             "name": "netflex/query-builder",
-            "version": "4.19.5",
+            "version": "4.19.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/netflex-sdk/query-builder.git",
-                "reference": "09d60dc74a34934a3f011a2c5df0fcb920763c5d"
+                "reference": "033904b0f02f123732154357aaa42d2218944f67"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/netflex-sdk/query-builder/zipball/09d60dc74a34934a3f011a2c5df0fcb920763c5d",
-                "reference": "09d60dc74a34934a3f011a2c5df0fcb920763c5d",
+                "url": "https://api.github.com/repos/netflex-sdk/query-builder/zipball/033904b0f02f123732154357aaa42d2218944f67",
+                "reference": "033904b0f02f123732154357aaa42d2218944f67",
                 "shasum": ""
             },
             "require": {
@@ -2205,7 +2205,7 @@
                 "illuminate/pagination": "^8.0",
                 "illuminate/support": "^8.0",
                 "larapack/dd": "^1.1",
-                "netflex/api": "^4.19.5",
+                "netflex/api": "^4.19.6",
                 "php": "^7.4|^8.0"
             },
             "require-dev": {
@@ -2255,22 +2255,22 @@
                 "query"
             ],
             "support": {
-                "source": "https://github.com/netflex-sdk/query-builder/tree/4.19.5"
+                "source": "https://github.com/netflex-sdk/query-builder/tree/4.19.6"
             },
-            "time": "2022-11-23T16:48:18+00:00"
+            "time": "2022-11-23T19:47:43+00:00"
         },
         {
             "name": "netflex/renderer",
-            "version": "4.19.5",
+            "version": "4.19.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/netflex-sdk/renderer.git",
-                "reference": "2dceb33d8ff695fe80d5a10acc83786dc9910934"
+                "reference": "b5bfed6efd92a5f4bdbd6ecefb354a5c4066a8db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/netflex-sdk/renderer/zipball/2dceb33d8ff695fe80d5a10acc83786dc9910934",
-                "reference": "2dceb33d8ff695fe80d5a10acc83786dc9910934",
+                "url": "https://api.github.com/repos/netflex-sdk/renderer/zipball/b5bfed6efd92a5f4bdbd6ecefb354a5c4066a8db",
+                "reference": "b5bfed6efd92a5f4bdbd6ecefb354a5c4066a8db",
                 "shasum": ""
             },
             "require": {
@@ -2279,7 +2279,7 @@
                 "illuminate/http": "^8.0",
                 "illuminate/support": "^8.0",
                 "illuminate/view": "^8.0",
-                "netflex/api": "^4.19.5",
+                "netflex/api": "^4.19.6",
                 "php": "^7.4|^8.0"
             },
             "type": "library",
@@ -2330,27 +2330,27 @@
                 "issues": "https://github.com/netflex-sdk/renderer/issues",
                 "source": "https://github.com/netflex-sdk/renderer"
             },
-            "time": "2022-11-23T16:48:16+00:00"
+            "time": "2022-11-23T19:47:49+00:00"
         },
         {
             "name": "netflex/support",
-            "version": "4.19.5",
+            "version": "4.19.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/netflex-sdk/support.git",
-                "reference": "8fa3226a14ae3e47d76a714c0c656aca229aa2c2"
+                "reference": "ba8f42dda342250a420741957856f1036bd22ef4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/netflex-sdk/support/zipball/8fa3226a14ae3e47d76a714c0c656aca229aa2c2",
-                "reference": "8fa3226a14ae3e47d76a714c0c656aca229aa2c2",
+                "url": "https://api.github.com/repos/netflex-sdk/support/zipball/ba8f42dda342250a420741957856f1036bd22ef4",
+                "reference": "ba8f42dda342250a420741957856f1036bd22ef4",
                 "shasum": ""
             },
             "require": {
                 "illuminate/contracts": "^8.0",
                 "illuminate/events": "^8.0",
                 "illuminate/support": "^8.0",
-                "netflex/api": "^4.19.5"
+                "netflex/api": "^4.19.6"
             },
             "require-dev": {
                 "larapack/dd": "^1.1",
@@ -2380,9 +2380,9 @@
             ],
             "description": "Netflex Support library",
             "support": {
-                "source": "https://github.com/netflex-sdk/support/tree/4.19.5"
+                "source": "https://github.com/netflex-sdk/support/tree/4.19.6"
             },
-            "time": "2022-11-23T16:48:12+00:00"
+            "time": "2022-11-23T19:48:17+00:00"
         },
         {
             "name": "psr/container",
