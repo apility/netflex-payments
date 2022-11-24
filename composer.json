@@ -16,5 +16,12 @@
         "apility/seotools": "^1.0",
         "apility/nets-easy": "^2.2",
         "netflex/renderer": "^4.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Apility\\Payment\\Providers\\PaymentServiceProvider"
+            ]
+        }
     }
 }
