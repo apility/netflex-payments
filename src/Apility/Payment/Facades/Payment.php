@@ -5,7 +5,6 @@ namespace Apility\Payment\Facades;
 use Apility\Payment\Contracts\Payment as PaymentContract;
 use Apility\Payment\Contracts\PaymentProcessor;
 use Apility\Payment\Processors\AbstractProcessor;
-use Apility\Payment\Processors\NullProcessor;
 
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\App;
@@ -31,6 +30,20 @@ class Payment extends Facade
         return null;
     }
 
+    public static function cancelPendingPayments(Order $order): int
+    {
+        return collect($order->getOrderPayments())
+            ->map(fn(CommercePayment $pay) => Payment::resolve($pay))
+            ->filter()
+            ->reject(fn(PaymentContract $pay) => $pay->isLocked())
+            ->each(function (PaymentContract $pay) use ($order) {
+                $pay->cancel();
+                $order->updatePayment($pay);
+                return $pay;
+            })
+            ->count();
+    }
+
     public static function processor(string $processor): ?PaymentProcessor
     {
         $processor = App::make('payment.processors.' . $processor);
@@ -47,6 +60,11 @@ class Payment extends Facade
             public function getProcessor(): string
             {
                 return $this->processor->getProcessor();
+            }
+
+            public function setup(string $driver, array $config)
+            {
+                $this->processor->setup($driver, $config);
             }
 
             public function create(Order $order): PaymentContract
@@ -67,12 +85,12 @@ class Payment extends Facade
 
     public static function create(Order $order, ?PaymentProcessor $processor = null): PaymentContract
     {
-        if (!count($order->getOrderCartItems()) || !$order->getOrderTotal() > 0) {
-            $processor = new NullProcessor;
+        if ($order->getOrderTotal() == 0) {
+            $processor = static::processor('free');
         } else {
-            /** @var PaymentProcessor */
             $processor = $processor ?? static::getFacadeRoot();
         }
+        /** @var PaymentProcessor $processor */
 
         $payment = $processor->create($order);
 

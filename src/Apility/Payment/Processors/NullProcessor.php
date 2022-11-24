@@ -11,7 +11,7 @@ class NullProcessor extends AbstractProcessor
 {
     public function getProcessor(): string
     {
-        return 'null';
+        return 'free';
     }
 
     public function create(Order $order): Payment
@@ -21,6 +21,6 @@ class NullProcessor extends AbstractProcessor
 
     public function find($paymentId = null): ?Payment
     {
-        return new NullPayment($this);
+        return new NullPayment($this, null, $paymentId);
     }
 }

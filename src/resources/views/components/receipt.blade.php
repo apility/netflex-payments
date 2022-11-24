@@ -83,11 +83,11 @@
 
 <div class="mt-2">
     <h4>@lang('Total amount'): <strong>@price($order->order_total)</strong></h4>
-    @if($payment = $order->payments->items->first())
+    @if($paymentMethods = $order->getPaymentMethod())
         <p>
             @lang('Paid with :method :date', [
-                'method' => '<strong>' . strtoupper($payment->card_type_name) . '</strong>',
-                'date' => \Illuminate\Support\Carbon::parse($payment->payment_date)->format(__('dateformat') . ' ' . __('timeformat'))
+                'method' => '<strong>' . strtoupper($paymentMethods) . '</strong>',
+                'date' => \Illuminate\Support\Carbon::parse($order->checkout->checkout_end)->format(__('dateformat') . ' ' . __('timeformat'))
             ])
         </p>
     @endif

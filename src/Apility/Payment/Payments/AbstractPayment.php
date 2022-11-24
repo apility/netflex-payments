@@ -7,6 +7,9 @@ use Apility\Payment\Contracts\Payment;
 
 abstract class AbstractPayment implements Payment
 {
+
+    abstract function cancelled(): bool;
+
     public function getPaymentMethod(): string
     {
         $processor = $this->getProcessor();
@@ -15,6 +18,9 @@ abstract class AbstractPayment implements Payment
 
     public function getPaymentStatus(): string
     {
+        if($this->cancelled()) {
+            return 'cancelled';
+        }
         return $this->paid() ? 'paid' : 'pending';
     }
 
@@ -45,6 +51,10 @@ abstract class AbstractPayment implements Payment
     public function getCardExpiry(): ?DateTimeInterface
     {
         return null;
+    }
+
+    public function setLocked(bool $isLocked)
+    {
     }
 
     public function toResponse($request)

@@ -16,11 +16,13 @@ class NullPayment extends AbstractPayment
 {
     protected ?Order $order;
     protected PaymentProcessor $processor;
+    private string $transactionId;
 
-    public function __construct(PaymentProcessor $processor, ?Order $order = null)
+    public function __construct(PaymentProcessor $processor, ?Order $order = null, ?string $transactionId = null)
     {
         $this->processor = $processor;
         $this->order = $order;
+        $this->transactionId = $transactionId ?? uuid();
     }
 
     public function getProcessor(): PaymentProcessor
@@ -55,7 +57,7 @@ class NullPayment extends AbstractPayment
 
     public function getPaymentMethod(): string
     {
-        return '';
+        return 'free';
     }
 
     public function isCharged(): bool
@@ -65,7 +67,7 @@ class NullPayment extends AbstractPayment
 
     public function getTransactionId(): string
     {
-        return '';
+        return $this->transactionId;
     }
 
     public function getChargedAmount(): float
@@ -97,5 +99,25 @@ class NullPayment extends AbstractPayment
     public function getPaymentUrl(): string
     {
         return PaymentRouter::callback($this->order, $this);
+    }
+
+    function cancelled(): bool
+    {
+        return false;
+    }
+
+    public function isLocked(): bool
+    {
+        return true;
+    }
+
+    public function getIsPending(): bool
+    {
+        return false;
+    }
+
+    public function getReservedAmount(): float
+    {
+        return $this->getTotalAmount();
     }
 }

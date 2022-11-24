@@ -65,6 +65,7 @@ class PaymentServiceProvider extends ServiceProvider
 
         $this->app->bind('payment.controller', fn () => Config::get('payment.controller'));
         $this->app->bind('payment.processor', fn () => $this->app->make('payment.processors.' . Config::get('payment.default')));
+        $this->app->bind('payment.processors.free', NullProcessor::class);
 
         $this->loadViewComponentsAs('payment', [
             \Apility\Payment\View\Components\Receipt::class,

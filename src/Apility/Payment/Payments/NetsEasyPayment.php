@@ -51,7 +51,13 @@ class NetsEasyPayment extends AbstractPayment
 
     public function cancel(): bool
     {
-        return $this->payment->cancel();
+        if ($this->getIsPending()) {
+            return $this->payment->terminate();
+        } else {
+            return $this->payment->cancel([
+                'amount' => $this->getTotalAmount() * 100,
+            ]);
+        }
     }
 
     public function refund(): bool
@@ -66,13 +72,24 @@ class NetsEasyPayment extends AbstractPayment
 
     public function getTotalAmount(): float
     {
-        return ((float) $this->payment->orderDetails->amount) / 100;
+        return ((float)$this->payment->orderDetails->amount) / 100;
     }
 
     public function getChargedAmount(): float
     {
+
         if (isset($this->payment->summary['chargedAmount'])) {
-            return ((float) $this->payment->summary['chargedAmount']) / 100;
+            return ((float)$this->payment->summary['chargedAmount']) / 100;
+        }
+
+        return 0.0;
+    }
+
+    public function getReservedAmount(): float
+    {
+
+        if (isset($this->payment->summary['reservedAmount'])) {
+            return ((float)$this->payment->summary['reservedAmount']) / 100;
         }
 
         return 0.0;
@@ -146,5 +163,25 @@ class NetsEasyPayment extends AbstractPayment
         }
 
         return null;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->payment->terminated || $this->payment->summary && ($this->payment->summary->cancelledAmount ?? 0) > 0;
+    }
+
+    public function isLocked(): bool
+    {
+        return $this->isCancelled() || $this->getChargedAmount() === $this->getTotalAmount();
+    }
+
+    public function getIsPending(): bool
+    {
+        return !$this->isCancelled() && $this->getChargedAmount() == 0.0 && $this->getReservedAmount() == 0.0;
+    }
+
+    function cancelled(): bool
+    {
+        return $this->isCancelled();
     }
 }

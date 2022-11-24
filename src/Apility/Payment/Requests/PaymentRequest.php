@@ -12,6 +12,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\App;
 
 use Netflex\Commerce\Contracts\Order;
+use Netflex\Commerce\Contracts\Payment as CommercePayment;
 use Netflex\Commerce\Order as OrderModel;
 
 class PaymentRequest extends FormRequest
@@ -85,28 +86,12 @@ class PaymentRequest extends FormRequest
         $payment = null;
         $order = $this->getOrder();
 
-        if ($order->getOrderData('paymentId') && $order->getOrderData('paymentProcessor')) {
-            if (App::has('payment.processors.' . $order->getOrderData('paymentProcessor'))) {
-                /** @var PaymentProcessor $processor */
-                $processor = App::make('payment.processors.' . $order->getOrderData('paymentProcessor'));
-                if ($payment = $processor->find($order->getOrderData('paymentId'))) {
-
-                    if ($payment->getTotalAmount() === $order->getOrderTotal()) {
-                        $order->addLogInfo('[' . $processor->getProcessor() . ']: A valid payment already exists, redirect to payment');
-                    } else {
-                        $order->setOrderData('paymentId', null);
-                        $order->setOrderData('paymentProcessor', null);
-                        $payment->cancel();
-                        $payment = null;
-                        $order->addLogWarning('[' . $processor->getProcessor() . ']: Payment cancelled due to mismatching order total');
-                    }
-                }
-            }
-        }
+        Payment::cancelPendingPayments($order);
 
         $payment = $payment ?? Payment::create($order);
         $processor = $payment->getProcessor();
 
+        $order->registerPayment($payment);
         $order->setOrderData('paymentId', $payment->getPaymentId(), 'Payment Id');
         $order->setOrderData('paymentProcessor', $processor->getProcessor(), 'Payment Processor');
 
