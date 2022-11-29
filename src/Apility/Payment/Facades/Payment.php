@@ -11,9 +11,6 @@ use Illuminate\Support\Facades\App;
 use Netflex\Commerce\Contracts\Order;
 use Netflex\Commerce\Contracts\Payment as CommercePayment;
 
-/**
- * @method static \Apility\Payment\Contracts\Payment create(\Netflex\Commerce\Contracts\Order $order)
- */
 class Payment extends Facade
 {
     protected static function getFacadeAccessor()
