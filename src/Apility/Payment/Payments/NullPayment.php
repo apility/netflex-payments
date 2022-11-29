@@ -22,7 +22,7 @@ class NullPayment extends AbstractPayment
     {
         $this->processor = $processor;
         $this->order = $order;
-        $this->transactionId = $transactionId ?? uuid();
+        $this->transactionId = $transactionId ?? $order->getOrderSecret();
     }
 
     public function getProcessor(): PaymentProcessor
