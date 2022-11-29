@@ -93,7 +93,7 @@ class NullPayment extends AbstractPayment
     /** @return int|string */
     public function getPaymentId()
     {
-        return '';
+        return $this->transactionId;
     }
 
     public function getPaymentUrl(): string
