@@ -3,7 +3,7 @@
 namespace Apility\Payment\Concerns;
 
 use Apility\Payment\Contracts\Payment as PaymentContract;
-use Apility\Payment\Routing\Payment as RoutingPayment;
+use Apility\Payment\Routing\Payment as PaymentRouter;
 
 use Illuminate\Support\Str;
 
@@ -34,7 +34,7 @@ trait CreatesNetsEasyPayments
 
         return [
             'integrationType' => 'HostedPaymentPage',
-            'returnUrl' => RoutingPayment::route('callback', ['order' => $order, 'processor' => $this->getProcessor()]),
+            'returnUrl' => PaymentRouter::route('callback', ['order' => $order, 'processor' => $this->getProcessor()]),
             'termsUrl' => '_____________________________________________',
             'merchantHandlesConsumerData' => true,
             'merchantHandlesShippingCost' => true,
@@ -107,12 +107,12 @@ trait CreatesNetsEasyPayments
 
     protected function createNetsEasyNotificationsPayload(Order $order): ?array
     {
-        /* if (env('APP_ENV') === 'master') {
+        if (env('APP_ENV') !== 'local') {
             $netsEasyPaymentConfig['notifications'] = [
                 'webHooks' => [
                     [
                         'eventName' => 'payment.checkout.completed',
-                        'url' => url(route('payment.callback', $order)),
+                        'url' => PaymentRouter::route('callback', ['order' => $order, 'processor' => $this->getProcessor()]),
                         'authorization' => $order->secret,
                         'headers' => [
                             [
@@ -122,7 +122,7 @@ trait CreatesNetsEasyPayments
                     ]
                 ]
             ];
-        } */
+        }
 
         return null;
     }
