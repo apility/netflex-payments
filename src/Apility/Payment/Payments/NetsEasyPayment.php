@@ -62,7 +62,13 @@ class NetsEasyPayment extends AbstractPayment
 
     public function refund(): bool
     {
-        return $this->payment->refund($this->getTransactionId(), ['amount' => $this->getChargedAmount() * 100]);
+        foreach ($this->payment->charges as $charge) {
+            if ($this->payment->refund($charge['chargeId'], ['amount' => $this->getChargedAmount() * 100])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function paid(): bool
