@@ -8,7 +8,6 @@ use Apility\Payment\Contracts\PaymentController as PaymentControllerContract;
 
 use Apility\Payment\Routing\Payment as Router;
 use Apility\Payment\Jobs\SendReceipt;
-use Apility\Payment\Payments\NullPayment;
 use Apility\Payment\Requests\PaymentCallbackRequest;
 use Apility\Payment\Requests\PaymentRequest;
 use Netflex\Commerce\Order;
@@ -30,7 +29,7 @@ class PaymentController extends Controller implements PaymentControllerContract
         if (!$order->isLocked()) {
             $payment = $request->getPayment();
 
-            if(!$payment) {
+            if (!$payment) {
                 return redirect()->to(Router::route('pay', ['order' => $order]));
             }
 
@@ -56,20 +55,33 @@ class PaymentController extends Controller implements PaymentControllerContract
 
     public function receipt(Order $order)
     {
+        $view = 'receipt';
 
-        if(!$order->isCompleted()) {
+        if (request()->boolean('pdf')) {
+            $view = 'pdf';
+        }
+
+        if (!$order->isCompleted()) {
             return redirect()->to(Router::route('pay', ['order' => $order]));
         }
 
-        return view('payment::receipt', [
+        return view('payment::' . $view, [
             'order' => $order
         ]);
     }
 
     public function receiptPdf(Order $order)
     {
-        return PDF::view('payment::pdf', ['order' => $order])
-            ->format(PDF::FORMAT_A4)
+        $pdf = PDF::url(Router::route('receipt', [
+            'order' => $order,
+            'pdf' => 1
+        ]));
+
+        if (app()->environment() === 'local') {
+            $pdf = PDF::view('payment::pdf', ['order' => $order]);
+        }
+
+        return $pdf->format(PDF::FORMAT_A4)
             ->emulatedMedia('screen')
             ->download();
     }
