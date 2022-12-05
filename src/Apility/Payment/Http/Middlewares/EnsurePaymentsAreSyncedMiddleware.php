@@ -13,18 +13,20 @@ class EnsurePaymentsAreSyncedMiddleware
     public function handle(Request $request, Closure $next)
     {
         /** @var Order $order */
-        if($request->has('secret')) {
+        if ($request->has('secret')) {
             $order = OrderAlias::retrieveBySecret($request->get('secret'));
         } else {
             $order = $request->route()->parameter('order');
+            $order = is_string($order) ? OrderAlias::retrieveBySecret($order) : $order;
         }
+
+        $order->refreshOrder();
 
         if ($order instanceof Order) {
 
             $refresh = false;
 
             foreach ($order->getOrderPayments() as $payment) {
-
                 if ($payment->isLocked()) {
                     continue;
                 }
@@ -41,6 +43,5 @@ class EnsurePaymentsAreSyncedMiddleware
         }
 
         return $next($request);
-
     }
 }
