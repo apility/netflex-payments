@@ -23,4 +23,9 @@ class NullProcessor extends AbstractProcessor
     {
         return new NullPayment($this, null, $paymentId);
     }
+
+    public function resolve($request): ?Payment
+    {
+        return new NullPayment($this);
+    }
 }
