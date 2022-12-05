@@ -4,7 +4,7 @@ namespace Apility\Payment\Requests;
 
 use Apility\Payment\Contracts\Payment as PaymentContract;
 use Apility\Payment\Contracts\PaymentProcessor;
-
+use Apility\Payment\Facades\Payment;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\App;
 
@@ -45,9 +45,6 @@ class PaymentCallbackRequest extends FormRequest
 
     public function getPayment(): ?PaymentContract
     {
-        $paymentId = $this->get('paymentId', $this->get('paymentid', $this->getOrder()->getOrderData('paymentId')));
-
-        return $this->getPaymentProcessor()
-            ->find($paymentId);
+        return $this->getPaymentProcessor()->resolve($this);
     }
 }

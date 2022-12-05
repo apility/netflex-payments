@@ -23,7 +23,6 @@ class PaymentController extends Controller implements PaymentControllerContract
 
     public function callback(PaymentCallbackRequest $request)
     {
-
         $order = $request->getOrder();
 
         if (!$order->isLocked()) {
@@ -41,6 +40,7 @@ class PaymentController extends Controller implements PaymentControllerContract
             }
 
             $order->refreshOrder();
+
             if ($order->isCompletable() && !$order->isCompleted() && !$order->isLocked()) {
                 $order->checkoutOrder();
                 $order->registerOrder();

@@ -4,6 +4,7 @@ namespace Apility\Payment\Contracts;
 
 use Netflex\Commerce\Contracts\Order;
 use Illuminate\Contracts\Routing\UrlRoutable;
+use Illuminate\Http\Request;
 
 interface PaymentProcessor extends UrlRoutable
 {
@@ -14,4 +15,6 @@ interface PaymentProcessor extends UrlRoutable
     public function create(Order $order): Payment;
 
     public function find($paymentId): ?Payment;
+
+    public function resolve(Request $request): ?Payment;
 }

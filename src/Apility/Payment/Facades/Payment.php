@@ -5,7 +5,7 @@ namespace Apility\Payment\Facades;
 use Apility\Payment\Contracts\Payment as PaymentContract;
 use Apility\Payment\Contracts\PaymentProcessor;
 use Apility\Payment\Processors\AbstractProcessor;
-
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\App;
 use Netflex\Commerce\Contracts\Order;
@@ -30,9 +30,9 @@ class Payment extends Facade
     public static function cancelPendingPayments(Order $order): int
     {
         return collect($order->getOrderPayments())
-            ->map(fn(CommercePayment $pay) => Payment::resolve($pay))
+            ->map(fn (CommercePayment $pay) => Payment::resolve($pay))
             ->filter()
-            ->reject(fn(PaymentContract $pay) => $pay->isLocked())
+            ->reject(fn (PaymentContract $pay) => $pay->isLocked())
             ->each(function (PaymentContract $pay) use ($order) {
                 $pay->cancel();
                 $order->updatePayment($pay);
@@ -76,6 +76,11 @@ class Payment extends Facade
             public function find($paymentId): ?PaymentContract
             {
                 return $this->processor->find($paymentId);
+            }
+
+            public function resolve(Request $request): ?PaymentContract
+            {
+                return $this->processor->resolve($request);
             }
         };
     }

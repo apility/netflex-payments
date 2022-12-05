@@ -5,6 +5,7 @@ namespace Apility\Payment\Routing;
 use Apility\Payment\Contracts\Payment as PaymentContract;
 use Apility\Payment\Contracts\PaymentProcessor;
 use Apility\Payment\Contracts\PaymentController;
+use Apility\Payment\Http\Middlewares\EnsureOrderNotCompleted;
 use Apility\Payment\Http\Middlewares\EnsurePaymentsAreSyncedMiddleware;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\App;
@@ -41,10 +42,10 @@ class Payment
                 $pdfRoutePath = static::$pdfRoutePath;
 
                 $routes = [
-                    'pay' => fn() => static::registerPaymentRoute(),
-                    'callback' => fn() => static::registerCallbackRoute(),
-                    'receipt' => fn() => static::registerReceiptRoute(),
-                    'receipt.pdf' => fn() => static::registerReceiptPdfRoute(static::$pdfRoutePath),
+                    'pay' => fn () => static::registerPaymentRoute(),
+                    'callback' => fn () => static::registerCallbackRoute(),
+                    'receipt' => fn () => static::registerReceiptRoute(),
+                    'receipt.pdf' => fn () => static::registerReceiptPdfRoute(static::$pdfRoutePath),
                 ];
 
                 foreach ($routes as $name => $register) {
@@ -83,7 +84,7 @@ class Payment
                 }
 
                 if ($currentRoute = Request::route()) {
-                    $routes = collect(static::$routes[$name])->keyBy(fn(Route $route) => $route->getName())
+                    $routes = collect(static::$routes[$name])->keyBy(fn (Route $route) => $route->getName())
                         ->filter(function (Route $route) use ($name, $currentRoute) {
                             $namePrefix = $currentRoute->getName();
                             $parts = explode('.', $namePrefix);
@@ -118,7 +119,13 @@ class Payment
 
     public static function registerPaymentRoute(string $path = ''): Route
     {
-        return static::registerRoute('get', $path, 'pay', 'pay');;
+        $registedRoute = null;
+
+        RouteRegistrar::group(['middleware' => EnsureOrderNotCompleted::class], function () use ($path, &$registedRoute) {
+            $registedRoute = static::registerRoute('get', $path, 'pay', 'pay');
+        });
+
+        return $registedRoute;
     }
 
     public static function registerCallbackRoute(string $path = 'callback'): Route

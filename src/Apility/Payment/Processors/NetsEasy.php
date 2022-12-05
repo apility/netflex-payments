@@ -8,7 +8,7 @@ use Nets\Easy;
 
 use Apility\Payment\Contracts\Payment;
 use Apility\Payment\Payments\NetsEasyPayment;
-
+use Illuminate\Http\Request;
 use Netflex\Commerce\Contracts\Order;
 
 class NetsEasy extends AbstractProcessor
@@ -42,5 +42,14 @@ class NetsEasy extends AbstractProcessor
     public function find($paymentId): ?Payment
     {
         return NetsEasyPayment::find($this, $paymentId);
+    }
+
+    public function resolve(Request $request): ?Payment
+    {
+        if ($paymentId = $request->get('paymentId', $request->get('paymentid'))) {
+            return $this->find($paymentId);
+        }
+
+        return null;
     }
 }
