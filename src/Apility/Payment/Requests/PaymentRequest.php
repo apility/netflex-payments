@@ -12,7 +12,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\App;
 
 use Netflex\Commerce\Contracts\Order;
-use Netflex\Commerce\Contracts\Payment as CommercePayment;
 use Netflex\Commerce\Order as OrderModel;
 
 class PaymentRequest extends FormRequest
@@ -77,7 +76,7 @@ class PaymentRequest extends FormRequest
         return null;
     }
 
-    public function getPayment(): ?PaymentContract
+    public function getPayment(?PaymentProcessor $processor = null): ?PaymentContract
     {
         if ($this->payment !== null) {
             return $this->payment;
@@ -88,7 +87,7 @@ class PaymentRequest extends FormRequest
 
         Payment::cancelPendingPayments($order);
 
-        $payment = $payment ?? Payment::create($order);
+        $payment = $payment ?? Payment::create($order, $processor);
         $processor = $payment->getProcessor();
 
         $order->registerPayment($payment);
