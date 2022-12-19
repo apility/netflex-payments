@@ -20,10 +20,8 @@ class EnsurePaymentsAreSyncedMiddleware
             $order = is_string($order) ? OrderAlias::retrieveBySecret($order) : $order;
         }
 
-        $order->refreshOrder();
-
         if ($order instanceof Order) {
-
+            $order->refreshOrder();
             $refresh = false;
 
             foreach ($order->getOrderPayments() as $payment) {
