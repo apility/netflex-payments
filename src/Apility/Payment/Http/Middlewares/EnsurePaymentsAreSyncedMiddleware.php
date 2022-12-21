@@ -19,5 +19,25 @@ class EnsurePaymentsAreSyncedMiddleware extends BaseEnsurePaymentsAreSyncedMiddl
             $order = $request->route()->parameter('order');
             return is_string($order) ? Order::retrieveBySecret($order) : $order;
         }
+
+        if ($order instanceof Order) {
+            $order->refreshOrder();
+            $refresh = false;
+
+            foreach ($order->getOrderPayments() as $payment) {
+                if ($payment->isLocked()) {
+                    continue;
+                }
+
+                if ($payment->getIsPending() && ($paymentObject = Payment::resolve($payment))) {
+                    if ($order->updatePayment($paymentObject)) {
+                        $refresh = true;
+                    }
+                }
+            }
+
+            if ($refresh)
+                $order->refreshOrder();
+        }
     }
 }
