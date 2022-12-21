@@ -2,9 +2,8 @@
 
 namespace Apility\Payment\Http\Middlewares;
 
-use Apility\Payment\Facades\Payment;
-use Closure;
 use Illuminate\Http\Request;
+use Apility\Payment\Facades\Payment;
 use Netflex\Commerce\Contracts\Order;
 use Netflex\Commerce\Order as OrderAlias;
 
@@ -14,10 +13,10 @@ class EnsurePaymentsAreSyncedMiddleware extends BaseEnsurePaymentsAreSyncedMiddl
     {
         /** @var Order $order */
         if ($request->has('secret')) {
-            return Order::retrieveBySecret($request->get('secret'));
+            return OrderAlias::retrieveBySecret($request->get('secret'));
         } else {
             $order = $request->route()->parameter('order');
-            return is_string($order) ? Order::retrieveBySecret($order) : $order;
+            return is_string($order) ? OrderAlias::retrieveBySecret($order) : $order;
         }
 
         if ($order instanceof Order) {
