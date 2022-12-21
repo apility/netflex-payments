@@ -8,20 +8,18 @@ use Illuminate\Http\Request;
 use Netflex\Commerce\Contracts\Order;
 use Netflex\Commerce\Order as OrderAlias;
 
-class EnsurePaymentsAreSyncedMiddleware extends BaseEnsurePaymentsAreSyncedMiddleware
+abstract class BaseEnsurePaymentsAreSyncedMiddleware
 {
-    function resolveOrder(?Request $request): ?Order
+    abstract function resolveOrder(?Request $request): ?Order;
+
+    public function handle(Request $request, Closure $next)
     {
-        /** @var Order $order */
-        if ($request->has('secret')) {
-            return Order::retrieveBySecret($request->get('secret'));
-        } else {
-            $order = $request->route()->parameter('order');
-            return is_string($order) ? Order::retrieveBySecret($order) : $order;
-        }
+
+        $order = $this->resolveOrder($request);
+        $order->refreshOrder();
 
         if ($order instanceof Order) {
-            $order->refreshOrder();
+
             $refresh = false;
 
             foreach ($order->getOrderPayments() as $payment) {
@@ -36,8 +34,17 @@ class EnsurePaymentsAreSyncedMiddleware extends BaseEnsurePaymentsAreSyncedMiddl
                 }
             }
 
-            if ($refresh)
+            if ($refresh) {
                 $order->refreshOrder();
+
+                if ($order->canBeCompleted()) {
+                    $order->completeOrder();
+                    $order->refreshOrder();
+                    return \Apility\Payment\Routing\Payment::route('receipt', ['order' => $order]);
+                }
+            }
         }
+
+        return $next($request);
     }
 }

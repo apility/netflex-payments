@@ -41,13 +41,9 @@ class PaymentController extends Controller implements PaymentControllerContract
 
             $order->refreshOrder();
 
-            if ($order->isCompletable() && !$order->isCompleted() && !$order->isLocked()) {
-                $order->checkoutOrder();
-                $order->registerOrder();
-                $order->lockOrder();
+            if ($order->canBeCompleted()) {
+                $order->completeOrder();
                 $order->refreshOrder();
-
-                dispatch(new SendReceipt($order));
             }
         }
         return redirect()->to(Router::route('receipt', ['order' => $order]));
