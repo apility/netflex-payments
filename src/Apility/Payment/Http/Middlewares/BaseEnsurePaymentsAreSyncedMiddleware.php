@@ -18,10 +18,9 @@ abstract class BaseEnsurePaymentsAreSyncedMiddleware
     {
 
         $order = $this->resolveOrder($request);
-        $order->refreshOrder();
 
         if ($order instanceof Order) {
-
+            $order->refreshOrder();
             $refresh = false;
 
             foreach ($order->getOrderPayments() as $payment) {
