@@ -33,12 +33,15 @@ class NetsEasyPayment extends AbstractPayment
      */
     protected ?string $checkoutLanguage;
 
+    protected ?string $countryCode;
+
     protected ?string $chargeId = null;
 
     public function __construct(PaymentProcessor $processor, ?EasyPayment $payment = null, ?string $countryCode = null, ?string $checkoutLanguage = null)
     {
         $this->processor = $processor;
         $this->payment = $payment;
+        $this->countryCode = $countryCode;
         $this->checkoutLanguage = $checkoutLanguage;
     }
 
@@ -177,8 +180,8 @@ class NetsEasyPayment extends AbstractPayment
 
     public static function make(PaymentProcessor $processor, Order $order, string $completePaymentButtonText = 'pay', ?string $countryCode = null, ?string $languageCode = null): ?Payment
     {
-        $instance = new static($processor);
-        $instance->payment = $instance->createNetsEasyPayment($order, $completePaymentButtonText, $countryCode, $languageCode);
+        $instance = new static($processor, null, $countryCode, $languageCode);
+        $instance->payment = $instance->createNetsEasyPayment($order, $completePaymentButtonText);
         return $instance;
     }
 
