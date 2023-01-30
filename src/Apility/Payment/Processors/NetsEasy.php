@@ -45,7 +45,7 @@ class NetsEasy extends AbstractProcessor
 
 
     /**
-     * @param string $processor
+     * @param string $driver
      * @param array{
      *     complete_payment_button_text: string,
      *     checkout_language: string,
@@ -53,9 +53,9 @@ class NetsEasy extends AbstractProcessor
      * } $config
      * @return void
      */
-    public function setup(string $processor, array $config)
+    public function setup(string $driver, array $config)
     {
-        $this->processor = $processor;
+        $this->processor = $driver;
         $config['mode'] = $config['mode'] ?? Str::startsWith($config['secret_key'] ?? '', 'test') ? 'test' : 'live';
 
         Easy::setup($config);
