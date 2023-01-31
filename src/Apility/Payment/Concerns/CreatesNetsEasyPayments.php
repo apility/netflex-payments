@@ -114,7 +114,7 @@ trait CreatesNetsEasyPayments
     protected function createNetsEasyNotificationsPayload(Order $order): ?array
     {
         if (env('APP_ENV') !== 'local') {
-            $netsEasyPaymentConfig['notifications'] = [
+            return [
                 'webHooks' => [
                     [
                         'eventName' => 'payment.checkout.completed',
