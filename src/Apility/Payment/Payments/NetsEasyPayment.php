@@ -23,7 +23,6 @@ class NetsEasyPayment extends AbstractPayment
     protected PaymentProcessor $processor;
     protected ?EasyPayment $payment;
 
-
     /**
      *
      * Which language code we want to append to checkout url
@@ -37,12 +36,12 @@ class NetsEasyPayment extends AbstractPayment
 
     protected ?string $chargeId = null;
 
-    public function __construct(PaymentProcessor $processor, ?EasyPayment $payment = null, ?string $countryCode = null, ?string $checkoutLanguage = null)
+    public function __construct(PaymentProcessor $processor, ?EasyPayment $payment = null, array $options)
     {
         $this->processor = $processor;
         $this->payment = $payment;
-        $this->countryCode = $countryCode;
-        $this->checkoutLanguage = $checkoutLanguage;
+        $this->countryCode = $options['country_code'];
+        $this->checkoutLanguage = $options['checkout_language'];
     }
 
     public function getProcessor(): PaymentProcessor
@@ -178,10 +177,15 @@ class NetsEasyPayment extends AbstractPayment
         return null;
     }
 
-    public static function make(PaymentProcessor $processor, Order $order, string $completePaymentButtonText = 'pay', ?string $countryCode = null, ?string $languageCode = null): ?Payment
+    public static function make(PaymentProcessor $processor, Order $order, array $options): ?Payment
     {
-        $instance = new static($processor, null, $countryCode, $languageCode);
-        $instance->payment = $instance->createNetsEasyPayment($order, $completePaymentButtonText);
+        $instance = new static($processor, null, $options);
+        $instance->payment = $instance->createNetsEasyPayment(
+            $order,
+            $options['complete_payment_button_text'] ?? 'pay',
+            $options,
+        );
+
         return $instance;
     }
 
@@ -213,4 +217,5 @@ class NetsEasyPayment extends AbstractPayment
     {
         return $this->isCancelled();
     }
+
 }

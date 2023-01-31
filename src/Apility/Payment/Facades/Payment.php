@@ -64,9 +64,9 @@ class Payment extends Facade
                 $this->processor->setup($driver, $config);
             }
 
-            public function create(Order $order): PaymentContract
+            public function create(Order $order, array $options): PaymentContract
             {
-                $payment = $this->processor->create($order);
+                $payment = $this->processor->create($order, $options);
                 $order->setOrderData('paymentId', $payment->getPaymentId());
                 $order->setOrderData('paymentProcessor', $this->getProcessor());
 
@@ -85,7 +85,7 @@ class Payment extends Facade
         };
     }
 
-    public static function create(Order $order, ?PaymentProcessor $processor = null): PaymentContract
+    public static function create(Order $order, ?PaymentProcessor $processor = null, array $options = []): PaymentContract
     {
         if ($order->getOrderTotal() == 0) {
             $processor = static::processor('free');
@@ -93,8 +93,7 @@ class Payment extends Facade
             $processor = $processor ?? static::getFacadeRoot();
         }
         /** @var PaymentProcessor $processor */
-
-        $payment = $processor->create($order);
+        $payment = $processor->create($order, $options);
 
         $order->setOrderData('paymentId', $payment->getPaymentId());
         $order->setOrderData('paymentProcessor', $processor->getProcessor());

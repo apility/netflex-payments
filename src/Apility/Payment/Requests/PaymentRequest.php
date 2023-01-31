@@ -78,28 +78,7 @@ class PaymentRequest extends FormRequest
 
     public function getPayment(?PaymentProcessor $processor = null): ?PaymentContract
     {
-        if ($this->payment !== null) {
-            return $this->payment;
-        }
-
-        $payment = null;
-        $order = $this->getOrder();
-
-        Payment::cancelPendingPayments($order);
-
-        $payment = $payment ?? Payment::create($order, $processor);
-        $processor = $payment->getProcessor();
-
-        $order->registerPayment($payment);
-        $order->setOrderData('paymentId', $payment->getPaymentId(), 'Payment Id');
-        $order->setOrderData('paymentProcessor', $processor->getProcessor(), 'Payment Processor');
-
-        $order->addLogInfo('[' . $processor->getProcessor() . ']: Payment initiated');
-        $order->addLogInfo('[' . $processor->getProcessor() . ']: Payment created with id: ' . $payment->getPaymentId());
-
-        $this->payment = $payment;
-
-        return $payment;
+        throw new \Exception('This functionality has been moved to the PaymentController');
     }
 
     public function failedAuthorization()

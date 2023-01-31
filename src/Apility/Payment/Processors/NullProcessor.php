@@ -14,7 +14,7 @@ class NullProcessor extends AbstractProcessor
         return 'free';
     }
 
-    public function create(Order $order): Payment
+    public function create(Order $order, array $options): Payment
     {
         return new NullPayment($this, $order);
     }

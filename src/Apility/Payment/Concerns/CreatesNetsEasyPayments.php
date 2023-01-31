@@ -14,14 +14,14 @@ use Netflex\Commerce\Contracts\Order;
 
 trait CreatesNetsEasyPayments
 {
-    protected function createNetsEasyPayment(Order $order, string $completePaymentButtonText = 'pay'): Payment
+    protected function createNetsEasyPayment(Order $order, string $completePaymentButtonText = 'pay', array $options): Payment
     {
-        $netsEasyPaymentConfig = array_filter([
+        $netsEasyPaymentConfig = array_replace_recursive(array_filter([
             'checkout' => $this->createNetsEasyCheckoutPayload($order, $completePaymentButtonText, $this->countryCode),
             'order' => $this->createNetsEasyOrderPayload($order),
             'paymentMethods' => $this->createNetsEasyPaymentMethodsPayload($order),
             'notifications' => $this->createNetsEasyNotificationsPayload($order),
-        ]);
+        ]), $options['create_payload_options'] ?? []);
 
         return Payment::create($netsEasyPaymentConfig);
     }
@@ -75,7 +75,7 @@ trait CreatesNetsEasyPayments
         return null;
     }
 
-    protected function createNetsEasyOrderPayload(Order $order): array
+    protected function createNetsEasyOrderPayload(Order $order, array $options = []): array
     {
         return [
             'currency' => $order->getOrderCurrency(),

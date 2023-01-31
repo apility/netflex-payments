@@ -64,13 +64,23 @@ class NetsEasy extends AbstractProcessor
         $this->countryCode = $config['country_code'] ?? null;
     }
 
-    public function create(Order $order): Payment
+
+    /**
+     * @param Order $order
+     * @param array $options
+     * @return Payment
+     */
+    public function create(Order $order, array $options): Payment
     {
+        $options['complete_payment_button_text'] = $this->completePaymentButtonText;
+        $options['country_code'] = $this->countryCode;
+        $options['checkout_language'] = $this->checkoutLanguage;
+
         if (!count($order->getOrderCartItems()) || !$order->getOrderTotal() > 0) {
-            return parent::create($order);
+            return parent::create($order, $options);
         }
 
-        return NetsEasyPayment::make($this, $order, $this->completePaymentButtonText, $this->countryCode, $this->checkoutLanguage);
+        return NetsEasyPayment::make($this, $order, $options);
     }
 
     public function find($paymentId): ?Payment
