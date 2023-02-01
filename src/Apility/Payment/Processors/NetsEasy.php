@@ -2,6 +2,7 @@
 
 namespace Apility\Payment\Processors;
 
+use Exception;
 use Illuminate\Support\Str;
 
 use Nets\Easy;
@@ -69,6 +70,7 @@ class NetsEasy extends AbstractProcessor
      * @param Order $order
      * @param array $options
      * @return Payment
+     * @throws Exception
      */
     public function create(Order $order, array $options): Payment
     {
@@ -77,7 +79,7 @@ class NetsEasy extends AbstractProcessor
         $options['checkout_language'] = $this->checkoutLanguage;
 
         if (!count($order->getOrderCartItems()) || !$order->getOrderTotal() > 0) {
-            return parent::create($order, $options);
+            throw new Exception('You are trying to make a Nets payment for a free order. Use the FreeProcessor for free orders, as Nets does not allow us to create payments of 0 kr');
         }
 
         return NetsEasyPayment::make($this, $order, $options);
