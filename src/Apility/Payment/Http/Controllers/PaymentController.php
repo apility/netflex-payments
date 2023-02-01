@@ -102,7 +102,9 @@ class PaymentController extends Controller implements PaymentControllerContract
      * @param OrderContract $order
      * @param PaymentProcessor|null $processor
      * @param array{
-     *   create_payload_options: array
+     *   create_payload_options: array,
+     *   checkout_language: string,
+     *   country_code: string
      * } $options
      * @return PaymentContract
      */

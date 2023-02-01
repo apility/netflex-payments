@@ -192,7 +192,10 @@ class NetsEasyPayment extends AbstractPayment
     public static function find(PaymentProcessor $processor, string $paymentId, ?string $countryCode = null, ?string $checkoutLanguage = null): ?Payment
     {
         if ($payment = EasyPayment::retrieve($paymentId)) {
-            return new static($processor, $payment, $countryCode, $checkoutLanguage);
+            return new static($processor, $payment, [
+                'country_code' => $countryCode,
+                'checkout_language' => $checkoutLanguage,
+            ]);
         }
 
         return null;
