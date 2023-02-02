@@ -12,7 +12,7 @@ interface PaymentProcessor extends UrlRoutable
 
     public function setup(string $driver, array $config);
 
-    public function create(Order $order): Payment;
+    public function create(Order $order, array $options = []): Payment;
 
     public function find($paymentId): ?Payment;
 

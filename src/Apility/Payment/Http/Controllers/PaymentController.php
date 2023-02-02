@@ -2,6 +2,11 @@
 
 namespace Apility\Payment\Http\Controllers;
 
+use Apility\Payment\Contracts\Payment as PaymentContract;
+use Apility\Payment\Contracts\PaymentProcessor;
+use Apility\Payment\Facades\Payment;
+use Apility\Payment\Processors\NetsEasy;
+use Exception;
 use Illuminate\Routing\Controller;
 
 use Apility\Payment\Contracts\PaymentController as PaymentControllerContract;
@@ -10,14 +15,22 @@ use Apility\Payment\Routing\Payment as Router;
 use Apility\Payment\Jobs\SendReceipt;
 use Apility\Payment\Requests\PaymentCallbackRequest;
 use Apility\Payment\Requests\PaymentRequest;
+use Netflex\Commerce\Contracts\Order as OrderContract;
 use Netflex\Commerce\Order;
 use Netflex\Render\PDF;
 
 class PaymentController extends Controller implements PaymentControllerContract
 {
+    /**
+     * @throws Exception
+     */
     public function pay(PaymentRequest $request)
     {
-        return $request->getPayment()
+        $order = $request->getOrder();
+        $processor = $request->getPaymentProcessor();
+
+        /** @var Order $order */
+        return $this->createNewPayment($order, $processor)
             ->pay();
     }
 
@@ -81,4 +94,42 @@ class PaymentController extends Controller implements PaymentControllerContract
             ->emulatedMedia('screen')
             ->download();
     }
+
+    /**
+     *
+     * Creates a new payment
+     *
+     * @param OrderContract $order
+     * @param PaymentProcessor|null $processor
+     * @param array{
+     *   create_payload_options: array,
+     *   checkout_language: string,
+     *   country_code: string
+     * } $options
+     * @return PaymentContract
+     */
+    protected function createPayment(OrderContract $order, ?PaymentProcessor $processor, array $options)
+    {
+        return Payment::create($order, $processor, $options);
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function createNewPayment(OrderContract $order, PaymentProcessor $processor = null): PaymentContract
+    {
+        Payment::cancelPendingPayments($order);
+
+        $payment = $this->createPayment($order, $processor, []);
+        $processor = $payment->getProcessor();
+
+        $order->registerPayment($payment);
+        $order->setOrderData('paymentId', $payment->getPaymentId(), 'Payment Id');
+        $order->setOrderData('paymentProcessor', $processor->getProcessor(), 'Payment Processor');
+        $order->addLogInfo('[' . $processor->getProcessor() . ']: Payment initiated');
+        $order->addLogInfo('[' . $processor->getProcessor() . ']: Payment created with id: ' . $payment->getPaymentId());
+
+        return $payment;
+    }
+
 }

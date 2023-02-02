@@ -14,25 +14,32 @@ use Netflex\Commerce\Contracts\Order;
 
 trait CreatesNetsEasyPayments
 {
-    protected function createNetsEasyPayment(Order $order, string $completePaymentButtonText = 'pay'): Payment
+    protected function createNetsEasyPayment(Order $order, string $completePaymentButtonText = 'pay', array $options): Payment
     {
-        $netsEasyPaymentConfig = array_filter([
-            'checkout' => $this->createNetsEasyCheckoutPayload($order, $completePaymentButtonText),
+        $countryCode = $options['country_code'] ?? $this->countryCode ?? null;
+        $netsEasyPaymentConfig = array_replace_recursive(array_filter([
+            'checkout' => $this->createNetsEasyCheckoutPayload($order, $completePaymentButtonText, $countryCode),
             'order' => $this->createNetsEasyOrderPayload($order),
             'paymentMethods' => $this->createNetsEasyPaymentMethodsPayload($order),
             'notifications' => $this->createNetsEasyNotificationsPayload($order),
-        ]);
+        ]), $options['create_payload_options'] ?? []);
 
         return Payment::create($netsEasyPaymentConfig);
     }
 
-    protected function createNetsEasyCheckoutPayload(Order $order, string $completePaymentButtonText = 'pay'): array
+    protected function createNetsEasyCheckoutPayload(Order $order, string $completePaymentButtonText = 'pay', ?string $countryCode = null): array
     {
         /** @var PaymentContract&CreatesNetsEasyPayments $this */
 
         $processor = $this->getProcessor();
 
-        return [
+        $payload = [];
+
+        if ($countryCode) {
+            $payload['countryCode'] = $countryCode;
+        }
+
+        return array_merge($payload, [
             'integrationType' => 'HostedPaymentPage',
             'returnUrl' => PaymentRouter::route('callback', ['order' => $order, 'processor' => $this->getProcessor()]),
             'termsUrl' => '_____________________________________________',
@@ -52,7 +59,7 @@ trait CreatesNetsEasyPayments
                     'completePaymentButtonText' => $completePaymentButtonText
                 ]
             ],
-        ];
+        ]);
     }
 
     protected function getNetsEasyOrderPhoneNumberPayload(Order $order): ?array
@@ -69,22 +76,22 @@ trait CreatesNetsEasyPayments
         return null;
     }
 
-    protected function createNetsEasyOrderPayload(Order $order): array
+    protected function createNetsEasyOrderPayload(Order $order, array $options = []): array
     {
         return [
             'currency' => $order->getOrderCurrency(),
             'reference' => $order->getOrderSecret(),
-            'amount' => (int) number_format(floatval($order->getOrderTotal()), 2, '', ''),
-            'items' => array_map(fn (CartItem $item) => [
+            'amount' => (int)number_format(floatval($order->getOrderTotal()), 2, '', ''),
+            'items' => array_map(fn(CartItem $item) => [
                 'reference' => $item->getCartItemProductId(),
                 'name' => $this->getNetsEasyCartItemName($item),
                 'quantity' => $item->getCartItemQuantity(),
                 'unit' => 'x',
-                'unitPrice' => (int) number_format(floatval($item->getCartItemPrice() / $item->getCartItemTaxRate()), 2, '', ''),
-                'taxRate' => (int) number_format(($item->getCartItemTaxRate() - 1) * 10000, 0, '', ''), // Taxrate (e.g 25.0 in this case),
-                'taxAmount' => (int) number_format(floatval($item->getCartItemTax()), 2, '', ''), // The total tax amount for this item in cents,
-                'grossTotalAmount' => (int) number_format(floatval($item->getCartItemTotal()), 2, '', ''), // Total for this item with tax in cents,
-                'netTotalAmount' => (int) number_format(floatval($item->getCartItemSubtotal()), 2, '', ''), // Total for this item without tax in cents
+                'unitPrice' => (int)number_format(floatval($item->getCartItemPrice() / $item->getCartItemTaxRate()), 2, '', ''),
+                'taxRate' => (int)number_format(($item->getCartItemTaxRate() - 1) * 10000, 0, '', ''), // Taxrate (e.g 25.0 in this case),
+                'taxAmount' => (int)number_format(floatval($item->getCartItemTax()), 2, '', ''), // The total tax amount for this item in cents,
+                'grossTotalAmount' => (int)number_format(floatval($item->getCartItemTotal()), 2, '', ''), // Total for this item with tax in cents,
+                'netTotalAmount' => (int)number_format(floatval($item->getCartItemSubtotal()), 2, '', ''), // Total for this item without tax in cents
             ], $order->getOrderCartItems())
         ];
     }
@@ -108,7 +115,7 @@ trait CreatesNetsEasyPayments
     protected function createNetsEasyNotificationsPayload(Order $order): ?array
     {
         if (env('APP_ENV') !== 'local') {
-            $netsEasyPaymentConfig['notifications'] = [
+            return [
                 'webHooks' => [
                     [
                         'eventName' => 'payment.checkout.completed',

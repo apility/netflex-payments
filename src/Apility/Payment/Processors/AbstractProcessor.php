@@ -6,7 +6,7 @@ use Apility\Payment\Contracts\PaymentProcessor;
 use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Support\Facades\App;
 
-abstract class AbstractProcessor implements PaymentProcessor, UrlRoutable
+abstract class AbstractProcessor implements PaymentProcessor
 {
     public function setup(string $driver, array $config)
     {

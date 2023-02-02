@@ -2,6 +2,7 @@
 
 namespace Apility\Payment\Payments;
 
+use Apility\Payment\Processors\NetsEasy;
 use DateTimeInterface;
 
 use Netflex\Commerce\Contracts\Order;
@@ -22,12 +23,25 @@ class NetsEasyPayment extends AbstractPayment
     protected PaymentProcessor $processor;
     protected ?EasyPayment $payment;
 
+    /**
+     *
+     * Which language code we want to append to checkout url
+     *
+     * @see NetsEasy
+     * @var string|null
+     */
+    protected ?string $checkoutLanguage;
+
+    protected ?string $countryCode;
+
     protected ?string $chargeId = null;
 
-    public function __construct(PaymentProcessor $processor, ?EasyPayment $payment = null)
+    public function __construct(PaymentProcessor $processor, ?EasyPayment $payment = null, array $options)
     {
         $this->processor = $processor;
         $this->payment = $payment;
+        $this->countryCode = $options['country_code'];
+        $this->checkoutLanguage = $options['checkout_language'];
     }
 
     public function getProcessor(): PaymentProcessor
@@ -113,7 +127,15 @@ class NetsEasyPayment extends AbstractPayment
 
     public function getPaymentUrl(): string
     {
-        return $this->payment->checkout->url;
+        $url = $this->payment->checkout->url;
+        if (!$this->checkoutLanguage) {
+            return $url;
+        }
+
+        $url .= strpos($url, '?') === false ? '?' : '&';
+        $url .= "language={$this->checkoutLanguage}";
+
+        return $url;
     }
 
     public function pay(): RedirectResponse
@@ -155,17 +177,25 @@ class NetsEasyPayment extends AbstractPayment
         return null;
     }
 
-    public static function make(PaymentProcessor $processor, Order $order, string $completePaymentButtonText = 'pay'): ?Payment
+    public static function make(PaymentProcessor $processor, Order $order, array $options): ?Payment
     {
-        $instance = new static($processor);
-        $instance->payment = $instance->createNetsEasyPayment($order, $completePaymentButtonText);
+        $instance = new static($processor, null, $options);
+        $instance->payment = $instance->createNetsEasyPayment(
+            $order,
+            $options['complete_payment_button_text'] ?? 'pay',
+            $options,
+        );
+
         return $instance;
     }
 
-    public static function find(PaymentProcessor $processor, string $paymentId): ?Payment
+    public static function find(PaymentProcessor $processor, string $paymentId, ?string $countryCode = null, ?string $checkoutLanguage = null): ?Payment
     {
         if ($payment = EasyPayment::retrieve($paymentId)) {
-            return new static($processor, $payment);
+            return new static($processor, $payment, [
+                'country_code' => $countryCode,
+                'checkout_language' => $checkoutLanguage,
+            ]);
         }
 
         return null;
@@ -190,4 +220,5 @@ class NetsEasyPayment extends AbstractPayment
     {
         return $this->isCancelled();
     }
+
 }
