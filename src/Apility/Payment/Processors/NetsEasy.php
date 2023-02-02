@@ -72,7 +72,7 @@ class NetsEasy extends AbstractProcessor
      * @return Payment
      * @throws Exception
      */
-    public function create(Order $order, array $options): Payment
+    public function create(Order $order, array $options = []): Payment
     {
         $options['complete_payment_button_text'] = $options['complete_payment_button_text'] ?? $this->completePaymentButtonText;
         $options['country_code'] = $options['country_code'] ?? $this->countryCode;

@@ -64,7 +64,7 @@ class Payment extends Facade
                 $this->processor->setup($driver, $config);
             }
 
-            public function create(Order $order, array $options): PaymentContract
+            public function create(Order $order, array $options = []): PaymentContract
             {
                 $payment = $this->processor->create($order, $options);
                 $order->setOrderData('paymentId', $payment->getPaymentId());
