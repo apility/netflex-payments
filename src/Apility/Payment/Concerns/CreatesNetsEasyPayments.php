@@ -16,8 +16,9 @@ trait CreatesNetsEasyPayments
 {
     protected function createNetsEasyPayment(Order $order, string $completePaymentButtonText = 'pay', array $options): Payment
     {
+        $countryCode = $options['country_code'] ?? $this->countryCode ?? null;
         $netsEasyPaymentConfig = array_replace_recursive(array_filter([
-            'checkout' => $this->createNetsEasyCheckoutPayload($order, $completePaymentButtonText, $this->countryCode),
+            'checkout' => $this->createNetsEasyCheckoutPayload($order, $completePaymentButtonText, $countryCode),
             'order' => $this->createNetsEasyOrderPayload($order),
             'paymentMethods' => $this->createNetsEasyPaymentMethodsPayload($order),
             'notifications' => $this->createNetsEasyNotificationsPayload($order),
