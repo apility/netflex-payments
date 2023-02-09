@@ -37,10 +37,12 @@ class PaymentRequest extends FormRequest
         $processor = $this->getPaymentProcessor();
 
         if ($order && $processor) {
-            $payment = $processor->find($order->getOrderData('paymentId'));
+            if ($paymentId = $order->getOrderData('paymentId')) {
+                $payment = $processor->find($paymentId);
 
-            if ($payment && $payment->paid()) {
-                return true;
+                if ($payment && $payment->paid()) {
+                    return true;
+                }
             }
         }
 
