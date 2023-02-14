@@ -29,7 +29,7 @@ class PaymentRequest extends FormRequest
         $order = $this->getOrder();
 
         if ($order) {
-            if ($order->getTotalPaid() > 0) {
+            if ($order->getTotalPaid() >= $order->getOrderTotal()) {
                 return true;
             }
         }
