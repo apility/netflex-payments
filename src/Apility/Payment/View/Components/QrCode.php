@@ -10,10 +10,12 @@ use Illuminate\View\Component;
 class QrCode extends Component
 {
     public ?string $string;
+    public bool $label;
 
-    public function __construct(?string $string = null)
+    public function __construct(?string $string = null, bool $label = true)
     {
         $this->string = $string;
+        $this->label = $label;
     }
 
     public function qr(): HtmlString
