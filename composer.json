@@ -13,7 +13,7 @@
         "illuminate/routing": "^8.0|^9.0",
         "chillerlan/php-qrcode": "^4.3",
         "netflex/commerce": "^4.0",
-        "apility/seotools": "^1.0",
+        "apility/seotools": "^1.0|^2.0",
         "apility/nets-easy": "^2.2",
         "netflex/renderer": "^4.0"
     },
