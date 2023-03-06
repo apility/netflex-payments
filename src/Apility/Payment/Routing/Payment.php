@@ -20,6 +20,7 @@ class Payment
 {
     protected static $routes = [];
     protected static string $pdfRoutePath = 'receipt';
+    protected static ?string $currentGroupPrefix = null;
 
     public static function controller(): string
     {
@@ -28,6 +29,17 @@ class Payment
 
     public static function routes(string $prefix = 'payment', ?callable $callback = null)
     {
+        static::$currentGroupPrefix = null;
+
+        if (RouteRegistrar::hasGroupStack()) {
+            $groupStack = RouteRegistrar::getGroupStack();
+            $groupStack = array_reverse($groupStack);
+
+            if (isset($groupStack[0]) && isset($groupStack[0]['as'])) {
+                static::$currentGroupPrefix = $groupStack[0]['as'];
+            }
+        }
+
         RouteRegistrar::group(['prefix' => $prefix], function () use ($callback) {
             RouteRegistrar::group(['prefix' => '{order}', 'middleware' => EnsurePaymentsAreSyncedMiddleware::class], function () use ($callback) {
                 if (!$callback) {
@@ -49,7 +61,7 @@ class Payment
                 ];
 
                 foreach ($routes as $name => $register) {
-                    if (!isset(static::$routes[$name]) || empty(static::$routes[$name])) {
+                    if (!isset(static::$routes[static::$currentGroupPrefix . $name]) || empty(static::$routes[static::$currentGroupPrefix . $name])) {
                         $register();
                     }
                 }
@@ -77,40 +89,28 @@ class Payment
 
     public static function route($name, $parameters = [], $absolute = true)
     {
-        if (isset(static::$routes[$name])) {
-            if (count(static::$routes[$name])) {
-                if (count(static::$routes[$name]) === 1) {
-                    return route(static::$routes[$name][0]->getName(), $parameters, $absolute);
-                }
+        if ($currentRoute = Request::route()) {
+            $namePrefix = $currentRoute->getName();
+            $parts = explode('.', $namePrefix);
 
-                if ($currentRoute = Request::route()) {
-                    $routes = collect(static::$routes[$name])->keyBy(fn (Route $route) => $route->getName())
-                        ->filter(function (Route $route) use ($name, $currentRoute) {
-                            $namePrefix = $currentRoute->getName();
-                            $parts = explode('.', $namePrefix);
+            while (count($parts)) {
+                $computedName = implode('.', $parts) . '.' . $name;
 
-                            while (count($parts)) {
-                                if (Str::startsWith($route->getName(), implode('.', $parts))) {
-                                    $namePrefix = implode('.', $parts);
-                                    break;
-                                }
-
-                                array_pop($parts);
-                            }
-
-                            $routeName = "$namePrefix.payment.$name";
-
-                            if ($route->getName() === $routeName) {
-                                return true;
-                            }
-                        });
-
-                    if ($routes->count()) {
-                        return route($routes->first()->getName(), $parameters, $absolute);
+                foreach (static::$routes as $key => $routes) {
+                    foreach ($routes as $route) {
+                        if ($route->getName() === $computedName) {
+                            return route($computedName, $parameters, $absolute);
+                        }
                     }
                 }
 
-                return route(static::$routes[$name][0]->getName(), $parameters, $absolute);
+                array_pop($parts);
+            }
+        }
+
+        foreach (static::$routes as $key => $routes) {
+            if (Str::endsWith($name, $key)) {
+                return route($routes[0]->getName(), $parameters, $absolute);
             }
         }
 
@@ -155,9 +155,9 @@ class Payment
         /** @var PaymentController */
         $controller = static::controller();
         $methods = !is_array($methods) ? [$methods] : $methods;
-        static::$routes[$name] = static::$routes[$name] ?? [];
+        static::$routes[static::$currentGroupPrefix . $name] = static::$routes[$name] ?? [];
 
-        return static::$routes[$name][] = RouteRegistrar::match($methods, $path, [$controller, $action])->name('payment.' . $name);
+        return static::$routes[static::$currentGroupPrefix . $name][] = RouteRegistrar::match($methods, $path, [$controller, $action])->name('payment.' . $name);
     }
 
     public function extend(string $alias, PaymentProcessor $processor)
