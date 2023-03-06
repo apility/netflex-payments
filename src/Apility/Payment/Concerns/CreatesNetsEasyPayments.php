@@ -78,21 +78,37 @@ trait CreatesNetsEasyPayments
 
     protected function createNetsEasyOrderPayload(Order $order, array $options = []): array
     {
+        $items = array_map(fn (CartItem $item) => [
+            'reference' => $item->getCartItemProductId(),
+            'name' => $this->getNetsEasyCartItemName($item),
+            'quantity' => $item->getCartItemQuantity(),
+            'unit' => 'x',
+            'unitPrice' => (int)number_format(floatval($item->getCartItemPrice() / $item->getCartItemTaxRate()), 2, '', ''),
+            'taxRate' => (int)number_format(($item->getCartItemTaxRate() - 1) * 10000, 0, '', ''), // Taxrate (e.g 25.0 in this case),
+            'taxAmount' => (int)number_format(floatval($item->getCartItemTax()), 2, '', ''), // The total tax amount for this item in cents,
+            'grossTotalAmount' => (int)number_format(floatval($item->getCartItemTotal()), 2, '', ''), // Total for this item with tax in cents,
+            'netTotalAmount' => (int)number_format(floatval($item->getCartItemSubtotal()), 2, '', ''), // Total for this item without tax in cents
+        ], $order->getOrderCartItems());
+
+        if ($order->checkout->shipping_total > 0) {
+            $items[] = [
+                'reference' => 'shipping',
+                'name' => __('Shipping'),
+                'quantity' => 1,
+                'unit' => 'x',
+                'unitPrice' => (int)number_format(floatval($order->checkout->shipping_cost), 2, '', ''),
+                'taxRate' => (int)number_format(($order->checkout->shipping_total / $order->checkout->shipping_cost - 1) * 10000, 0, '', ''), // Taxrate (e.g 25.0 in this case),
+                'taxAmount' => (int)number_format(floatval($order->checkout->shipping_tax), 2, '', ''), // The total tax amount for this item in cents,
+                'grossTotalAmount' => (int)number_format(floatval($order->checkout->shipping_total), 2, '', ''), // Total for this item with tax in cents,
+                'netTotalAmount' => (int)number_format(floatval($order->checkout->shipping_cost), 2, '', ''), // Total for this item without tax in cents
+            ];
+        }
+
         return [
             'currency' => $order->getOrderCurrency(),
             'reference' => $order->getOrderSecret(),
             'amount' => (int)number_format(floatval($order->getOrderTotal()), 2, '', ''),
-            'items' => array_map(fn(CartItem $item) => [
-                'reference' => $item->getCartItemProductId(),
-                'name' => $this->getNetsEasyCartItemName($item),
-                'quantity' => $item->getCartItemQuantity(),
-                'unit' => 'x',
-                'unitPrice' => (int)number_format(floatval($item->getCartItemPrice() / $item->getCartItemTaxRate()), 2, '', ''),
-                'taxRate' => (int)number_format(($item->getCartItemTaxRate() - 1) * 10000, 0, '', ''), // Taxrate (e.g 25.0 in this case),
-                'taxAmount' => (int)number_format(floatval($item->getCartItemTax()), 2, '', ''), // The total tax amount for this item in cents,
-                'grossTotalAmount' => (int)number_format(floatval($item->getCartItemTotal()), 2, '', ''), // Total for this item with tax in cents,
-                'netTotalAmount' => (int)number_format(floatval($item->getCartItemSubtotal()), 2, '', ''), // Total for this item without tax in cents
-            ], $order->getOrderCartItems())
+            'items' => $items
         ];
     }
 
