@@ -78,7 +78,7 @@ class NetsEasy extends AbstractProcessor
         $options['country_code'] = $options['country_code'] ?? $this->countryCode;
         $options['checkout_language'] = $options['checkout_language'] ?? $this->checkoutLanguage;
 
-        if (!count($order->getOrderCartItems()) || !$order->getOrderTotal() > 0) {
+        if ((!count($order->getOrderCartItems()) && !$order->checkout->shipping_total) || !$order->getOrderTotal() > 0) {
             throw new Exception('You are trying to make a Nets payment for a free order. Use the FreeProcessor for free orders, as Nets does not allow us to create payments of 0 kr');
         }
 
