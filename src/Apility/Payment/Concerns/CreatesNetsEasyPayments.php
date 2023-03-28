@@ -76,10 +76,10 @@ trait CreatesNetsEasyPayments
         return null;
     }
 
-    protected function createNetsEasyOrderPayload(Order $order, array $options = []): array
+    protected function createNetsEasyCartItem(CartItem $item)
     {
-        $items = array_map(fn (CartItem $item) => [
-            'reference' => $item->getCartItemProductId(),
+        return [
+            'reference' => (string)$item->getCartItemLineNumber(),
             'name' => $this->getNetsEasyCartItemName($item),
             'quantity' => $item->getCartItemQuantity(),
             'unit' => 'x',
@@ -88,7 +88,12 @@ trait CreatesNetsEasyPayments
             'taxAmount' => (int)number_format(floatval($item->getCartItemTax()), 2, '', ''), // The total tax amount for this item in cents,
             'grossTotalAmount' => (int)number_format(floatval($item->getCartItemTotal()), 2, '', ''), // Total for this item with tax in cents,
             'netTotalAmount' => (int)number_format(floatval($item->getCartItemSubtotal()), 2, '', ''), // Total for this item without tax in cents
-        ], $order->getOrderCartItems());
+        ];
+    }
+
+    protected function createNetsEasyOrderPayload(Order $order, array $options = []): array
+    {
+        $items = array_map(fn(CartItem $item) => $this->createNetsEasyCartItem($item), $order->getOrderCartItems());
 
         if ($order->checkout->shipping_total > 0) {
             $items[] = [

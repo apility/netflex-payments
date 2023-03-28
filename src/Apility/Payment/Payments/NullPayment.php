@@ -45,7 +45,7 @@ class NullPayment extends AbstractPayment
         return true;
     }
 
-    public function refund(): bool
+    public function refund(?float $amount = null): bool
     {
         return true;
     }

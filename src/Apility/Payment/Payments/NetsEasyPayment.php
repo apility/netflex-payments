@@ -5,6 +5,7 @@ namespace Apility\Payment\Payments;
 use Apility\Payment\Processors\NetsEasy;
 use DateTimeInterface;
 
+use Netflex\Commerce\CartItem;
 use Netflex\Commerce\Contracts\Order;
 
 use Nets\Easy\Payment as EasyPayment;
@@ -74,10 +75,34 @@ class NetsEasyPayment extends AbstractPayment
         }
     }
 
-    public function refund(): bool
+    public function refund(?float $amount = null): bool
     {
+
+        if(!$amount) {
+            $options = [
+                'amount' => $this->getChargedAmount() * 100
+            ];
+
+        } else {
+            $options = [
+                'amount' => $amount * 100,
+                'orderItems' => [
+                    $this->createNetsEasyCartItem(new CartItem([
+                        'id' => '-1',
+                        'entry_name' => 'Refund',
+                        'variant_name' => 'sum',
+                        'no_of_entries' => 1,
+                        'entry_cost' => $amount,
+                        'tax_percent' => 1.0,
+                        'entries_cost' => $amount,
+                        'entries_total' => $amount,
+                    ])),
+                ]
+            ];
+        }
+
         foreach ($this->payment->charges as $charge) {
-            if ($this->payment->refund($charge['chargeId'], ['amount' => $this->getChargedAmount() * 100])) {
+            if ($this->payment->refund($charge['chargeId'], $options)) {
                 return true;
             }
         }

@@ -16,7 +16,20 @@ interface Payment extends OrderPayment, Responsable
 
     public function cancel(): bool;
 
-    public function refund(): bool;
+    /**
+     *
+     * Refund payment partially or fully.
+     *
+     * Amount must be supplied in the same format as getChargedAmount/getTotalAmount.
+     * In other words, dont use cents, use the main currency unit(NOK, USD), not the fractional currency unit(Øre, Cents)
+     *
+     * @see self::getChargedAmount
+     * @see self::getTotalAmount
+     *
+     * @param float|null $amount
+     * @return bool
+     */
+    public function refund(?float $amount = null): bool;
 
     public function paid(): bool;
 
