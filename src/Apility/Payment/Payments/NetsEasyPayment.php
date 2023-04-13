@@ -37,12 +37,20 @@ class NetsEasyPayment extends AbstractPayment
 
     protected ?string $chargeId = null;
 
+    protected bool $charge = true;
+
     public function __construct(PaymentProcessor $processor, ?EasyPayment $payment = null, array $options)
     {
         $this->processor = $processor;
         $this->payment = $payment;
+        $this->setOptions($options);
+    }
+
+    public function setOptions(array $options)
+    {
         $this->countryCode = $options['country_code'];
         $this->checkoutLanguage = $options['checkout_language'];
+        $this->charge = isset($options['charge']) ? (bool) $options['charge'] : true;
     }
 
     public function getProcessor(): PaymentProcessor
@@ -78,11 +86,10 @@ class NetsEasyPayment extends AbstractPayment
     public function refund(?float $amount = null): bool
     {
 
-        if(!$amount) {
+        if (!$amount) {
             $options = [
                 'amount' => $this->getChargedAmount() * 100
             ];
-
         } else {
             $options = [
                 'amount' => $amount * 100,
@@ -112,7 +119,11 @@ class NetsEasyPayment extends AbstractPayment
 
     public function paid(): bool
     {
-        return $this->getChargedAmount() >= $this->getTotalAmount();
+        if ($this->charge) {
+            return $this->getChargedAmount() >= $this->getTotalAmount();
+        }
+
+        return $this->getReservedAmount() >= $this->getTotalAmount();
     }
 
     public function getTotalAmount(): float
@@ -122,7 +133,6 @@ class NetsEasyPayment extends AbstractPayment
 
     public function getChargedAmount(): float
     {
-
         if (isset($this->payment->summary['chargedAmount'])) {
             return ((float)$this->payment->summary['chargedAmount']) / 100;
         }
@@ -132,7 +142,6 @@ class NetsEasyPayment extends AbstractPayment
 
     public function getReservedAmount(): float
     {
-
         if (isset($this->payment->summary['reservedAmount'])) {
             return ((float)$this->payment->summary['reservedAmount']) / 100;
         }
@@ -170,10 +179,11 @@ class NetsEasyPayment extends AbstractPayment
 
     public function charge(): bool
     {
-        $remaining = min(0, max($this->getTotalAmount(), $this->getTotalAmount() - $this->getChargedAmount()));
+        $remaining = $this->getReservedAmount();
 
         if ($remaining > 0) {
-            $this->chargeId = $this->payment->charge(['amount' => $remaining * 100]);
+            $this->chargeId = $this->payment->charge(['amount' => $remaining * 100])['chargeId'];
+            $this->payment = EasyPayment::retrieve($this->payment->paymentId);
             return true;
         }
 
@@ -204,6 +214,11 @@ class NetsEasyPayment extends AbstractPayment
 
     public static function make(PaymentProcessor $processor, Order $order, array $options): ?Payment
     {
+        $options['charge'] = true;
+        if (property_exists($processor, 'charge')) {
+            $options['charge'] = $processor->charge;
+        }
+
         $instance = new static($processor, null, $options);
         $instance->payment = $instance->createNetsEasyPayment(
             $order,
@@ -246,4 +261,25 @@ class NetsEasyPayment extends AbstractPayment
         return $this->isCancelled();
     }
 
+    public function getPaymentStatus(): string
+    {
+        if ($this->cancelled()) {
+            return 'cancelled';
+        }
+
+        return $this->paid() ? 'paid' : 'pending';
+    }
+
+    public function getCaptureStatus(): string
+    {
+        if ($this->getChargedAmount() >= $this->getTotalAmount()) {
+            return 'captured';
+        }
+
+        if ($this->getReservedAmount() >= $this->getTotalAmount()) {
+            return 'reserved';
+        }
+
+        return 'pending';
+    }
 }

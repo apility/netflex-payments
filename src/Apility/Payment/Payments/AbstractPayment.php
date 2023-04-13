@@ -18,7 +18,7 @@ abstract class AbstractPayment implements Payment
 
     public function getPaymentStatus(): string
     {
-        if($this->cancelled()) {
+        if ($this->cancelled()) {
             return 'cancelled';
         }
         return $this->paid() ? 'paid' : 'pending';
@@ -35,7 +35,11 @@ abstract class AbstractPayment implements Payment
 
     public function getPaymentAmount(): float
     {
-        return $this->getChargedAmount();
+        if ($this->getCaptureStatus() === 'captured') {
+            return $this->getChargedAmount();
+        }
+
+        return $this->getReservedAmount();
     }
 
     public function getCardType(): ?string
@@ -60,5 +64,10 @@ abstract class AbstractPayment implements Payment
     public function toResponse($request)
     {
         return $this->pay();
+    }
+
+    public function setOptions(array $options)
+    {
+        //
     }
 }

@@ -16,6 +16,7 @@ class NetsEasy extends AbstractProcessor
 {
     protected string $processor = 'nets-easy';
     protected string $completePaymentButtonText = 'pay';
+    public bool $charge = true;
 
     /**
      *
@@ -63,6 +64,10 @@ class NetsEasy extends AbstractProcessor
         $this->completePaymentButtonText = $config['complete_payment_button_text'] ?? 'pay';
         $this->checkoutLanguage = $config['checkout_language'] ?? null;
         $this->countryCode = $config['country_code'] ?? null;
+
+        if (isset($config['charge'])) {
+            $this->charge = (bool) $config['charge'];
+        }
     }
 
 
@@ -87,7 +92,17 @@ class NetsEasy extends AbstractProcessor
 
     public function find($paymentId): ?Payment
     {
-        return NetsEasyPayment::find($this, $paymentId, $this->countryCode, $this->checkoutLanguage);
+        if ($payment = NetsEasyPayment::find($this, $paymentId, $this->countryCode, $this->checkoutLanguage)) {
+            $payment->setOptions([
+                'complete_payment_button_text' => $this->completePaymentButtonText,
+                'checkout_language' => $this->checkoutLanguage,
+                'charge' => $this->charge,
+                'country_code' => $this->countryCode,
+            ]);
+            return $payment;
+        }
+
+        return null;
     }
 
     public function resolve(Request $request): ?Payment

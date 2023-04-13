@@ -4,7 +4,7 @@ namespace Apility\Payment\Providers;
 
 use Apility\Payment\Contracts\PaymentProcessor;
 use Apility\Payment\Processors\NullProcessor;
-
+use Apility\Payment\Routing\Payment;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Blade;
@@ -62,6 +62,8 @@ class PaymentServiceProvider extends ServiceProvider
                 }
             }
         });
+
+        $this->app->bind('payment.router', Payment::class);
 
         $this->app->bind('payment.controller', fn () => Config::get('payment.controller'));
         $this->app->bind('payment.processor', fn () => $this->app->make('payment.processors.' . Config::get('payment.default')));
