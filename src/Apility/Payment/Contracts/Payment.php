@@ -46,6 +46,5 @@ interface Payment extends OrderPayment, Responsable
 
     public function getPaymentUrl(): string;
 
-
-
+    public function setOptions(array $options);
 }
