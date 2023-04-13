@@ -11,7 +11,7 @@ use Illuminate\Routing\Controller;
 
 use Apility\Payment\Contracts\PaymentController as PaymentControllerContract;
 
-use Apility\Payment\Routing\Payment as Router;
+use Apility\Payment\Facades\Router;
 use Apility\Payment\Jobs\SendReceipt;
 use Apility\Payment\Requests\PaymentCallbackRequest;
 use Apility\Payment\Requests\PaymentRequest;
@@ -131,5 +131,4 @@ class PaymentController extends Controller implements PaymentControllerContract
 
         return $payment;
     }
-
 }

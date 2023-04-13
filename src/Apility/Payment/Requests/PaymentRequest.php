@@ -5,7 +5,7 @@ namespace Apility\Payment\Requests;
 use Apility\Payment\Contracts\Payment as PaymentContract;
 use Apility\Payment\Contracts\PaymentProcessor;
 
-use Apility\Payment\Routing\Payment as PaymentRouter;
+use Apility\Payment\Facades\Router;
 use Apility\Payment\Facades\Payment;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -87,10 +87,10 @@ class PaymentRequest extends FormRequest
     {
         if ($this->orderAlreadyPaid()) {
             $order = $this->getOrder();
-            $redirect = PaymentRouter::route('receipt', ['order' => $order]);
+            $redirect = Router::route('receipt', ['order' => $order]);
 
             if ($processor = $this->getPaymentProcessor()) {
-                $redirect = PaymentRouter::route('callback', [
+                $redirect = Router::route('callback', [
                     'order' => $this->getOrder(),
                     'processor' => $processor
                 ]);

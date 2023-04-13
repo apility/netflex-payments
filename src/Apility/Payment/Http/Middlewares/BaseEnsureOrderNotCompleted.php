@@ -3,7 +3,7 @@
 namespace Apility\Payment\Http\Middlewares;
 
 use Apility\Payment\Facades\Payment;
-use Apility\Payment\Routing\Payment as RoutingPayment;
+use Apility\Payment\Facades\Router;
 use Closure;
 use Illuminate\Http\Request;
 use Netflex\Commerce\Contracts\Order;
@@ -26,7 +26,7 @@ abstract class BaseEnsureOrderNotCompleted
         abort_unless($order, 500);
 
         if ($order->isLocked()) {
-            return redirect(RoutingPayment::route('receipt', $order));
+            return redirect(Router::route('receipt', $order));
         }
 
         return $next($request);
