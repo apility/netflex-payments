@@ -45,7 +45,7 @@ trait CreatesNetsEasyPayments
             'termsUrl' => '_____________________________________________',
             'merchantHandlesConsumerData' => true,
             'merchantHandlesShippingCost' => true,
-            'charge' => true,
+            'charge' => property_exists($this, 'charge') ? $this->charge : true,
             'consumer' => array_filter([
                 'email' => $order->getOrderCustomerEmail(),
                 'phoneNumber' => $this->getNetsEasyOrderPhoneNumberPayload($order),
@@ -93,7 +93,7 @@ trait CreatesNetsEasyPayments
 
     protected function createNetsEasyOrderPayload(Order $order, array $options = []): array
     {
-        $items = array_map(fn(CartItem $item) => $this->createNetsEasyCartItem($item), $order->getOrderCartItems());
+        $items = array_map(fn (CartItem $item) => $this->createNetsEasyCartItem($item), $order->getOrderCartItems());
 
         if ($order->checkout->shipping_total > 0) {
             $items[] = [
