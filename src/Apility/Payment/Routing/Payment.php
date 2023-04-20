@@ -130,7 +130,8 @@ class Payment
 
     public static function registerCallbackRoute(string $path = 'callback'): Route
     {
-        return static::registerRoute(['get', 'post'], '{processor}/' . $path, 'callback', 'callback');
+        return static::registerRoute(['get', 'post'], '{processor}/' . $path, 'callback', 'callback')
+            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
     }
 
     public static function registerReceiptRoute(string $path = 'receipt'): Route
