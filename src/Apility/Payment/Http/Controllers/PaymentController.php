@@ -34,6 +34,10 @@ class PaymentController extends Controller implements PaymentControllerContract
             ->pay();
     }
 
+    public function onCallback(Order $order, Payment $payment)
+    {
+    }
+
     public function callback(PaymentCallbackRequest $request)
     {
         $order = $request->getOrder();
@@ -59,6 +63,9 @@ class PaymentController extends Controller implements PaymentControllerContract
                 $order->refreshOrder();
             }
         }
+
+        $this->onCallback($order, $payment);
+
         return redirect()->to(Router::route('receipt', ['order' => $order]));
     }
 
