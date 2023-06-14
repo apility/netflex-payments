@@ -107,7 +107,7 @@ class NetsEasy extends AbstractProcessor
 
     public function resolve(Request $request): ?Payment
     {
-        if ($paymentId = $request->get('paymentId', $request->get('paymentid'))) {
+        if ($paymentId = $request->get('paymentId', $request->input('data.paymentId'))) {
             return $this->find($paymentId);
         }
 
