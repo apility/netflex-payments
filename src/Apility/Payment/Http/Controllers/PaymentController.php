@@ -2,20 +2,21 @@
 
 namespace Apility\Payment\Http\Controllers;
 
+use Exception;
+
 use Apility\Payment\Contracts\Payment as PaymentContract;
 use Apility\Payment\Contracts\PaymentProcessor;
 use Apility\Payment\Facades\Payment;
-use Apility\Payment\Processors\NetsEasy;
-use Exception;
+
 use Illuminate\Routing\Controller;
 
 use Apility\Payment\Contracts\PaymentController as PaymentControllerContract;
 
 use Apility\Payment\Facades\Router;
-use Apility\Payment\Jobs\SendReceipt;
 use Apility\Payment\Requests\PaymentCallbackRequest;
 use Apility\Payment\Requests\PaymentRequest;
 use Netflex\Commerce\Contracts\Order as OrderContract;
+
 use Netflex\Commerce\Order;
 use Netflex\Render\PDF;
 
@@ -34,16 +35,16 @@ class PaymentController extends Controller implements PaymentControllerContract
             ->pay();
     }
 
-    public function onCallback(Order $order, Payment $payment)
+    public function onCallback(Order $order, PaymentContract $payment)
     {
     }
 
     public function callback(PaymentCallbackRequest $request)
     {
         $order = $request->getOrder();
+        $payment = $request->getPayment();
 
         if (!$order->isLocked()) {
-            $payment = $request->getPayment();
 
             if (!$payment) {
                 return redirect()->to(Router::route('pay', ['order' => $order]));
