@@ -70,7 +70,6 @@ class NetsEasy extends AbstractProcessor
         }
     }
 
-
     /**
      * @param Order $order
      * @param array $options
@@ -107,8 +106,12 @@ class NetsEasy extends AbstractProcessor
 
     public function resolve(Request $request): ?Payment
     {
-        if ($paymentId = $request->get('paymentId', $request->input('data.paymentId'))) {
-            return $this->find($paymentId);
+        $keys = ['paymentid', 'paymentId'];
+
+        foreach ($keys as $key) {
+            if ($paymentId = $request->get($key, $request->input('data.' . $key))) {
+                return $this->find($paymentId);
+            }
         }
 
         return null;
