@@ -109,7 +109,7 @@ class Payment
         }
 
         foreach (static::$routes as $key => $routes) {
-            if (Str::endsWith($name, $key)) {
+            if (Str::endsWith($key, $name)) {
                 return route($routes[0]->getName(), $parameters, $absolute);
             }
         }
