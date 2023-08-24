@@ -26,7 +26,7 @@ abstract class BaseEnsureOrderNotCompleted
         abort_unless($order, 500);
 
         if ($order->isLocked()) {
-            return redirect(RoutingPayment::route('receipt', $order));
+            return redirect(RoutingPayment::route('receipt', $order, false));
         }
 
         return $next($request);

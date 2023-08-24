@@ -41,7 +41,7 @@ abstract class BaseEnsurePaymentsAreSyncedMiddleware
                 if ($order->canBeCompleted()) {
                     $order->completeOrder();
                     $order->refreshOrder();
-                    return redirect(PaymentRouter::route('receipt', ['order' => $order]));
+                    return redirect(PaymentRouter::route('receipt', ['order' => $order], false));
                 }
             }
         }
