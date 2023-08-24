@@ -48,7 +48,7 @@
                     <td>
                         {{ $item->getCartItemProductName() }}
                         @if($variant = $item->getCartItemVariantName())
-                            @if($variant !== $name)
+                            @if($variant !== $item->getCartItemProductName())
                                 ({{ $variant }})
                             @endif>
                         @endif
