@@ -182,7 +182,7 @@ class NetsEasyPayment extends AbstractPayment
         $remaining = $this->getReservedAmount();
 
         if ($remaining > 0) {
-            $this->chargeId = $this->payment->charge(['amount' => $remaining * 100])['chargeId'];
+            $this->chargeId = $this->payment->charge(['amount' => intval(round($remaining * 100))])['chargeId'];
             $this->payment = EasyPayment::retrieve($this->payment->paymentId);
             return true;
         }
