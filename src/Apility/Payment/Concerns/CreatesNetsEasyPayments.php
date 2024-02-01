@@ -80,7 +80,7 @@ trait CreatesNetsEasyPayments
     {
         return [
             'reference' => (string)$item->getCartItemLineNumber(),
-            'name' => $this->getNetsEasyCartItemName($item),
+            'name' => mb_strimwidth($this->getNetsEasyCartItemName($item), 0, 125, '..'),
             'quantity' => $item->getCartItemQuantity(),
             'unit' => 'x',
             'unitPrice' => (int)number_format(floatval($item->getCartItemPrice() / $item->getCartItemTaxRate()), 2, '', ''),
