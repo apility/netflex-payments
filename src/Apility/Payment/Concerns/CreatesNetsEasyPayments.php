@@ -125,7 +125,7 @@ trait CreatesNetsEasyPayments
             $name = "$name ($variant)";
         }
 
-        $name = preg_replace('/([^\x00-\x7FæøåÆØÅ]|[\'<>\\])/', '', $name);
+        $name = preg_replace('/([^\x00-\x7FæøåÆØÅ]|[\'<>\\\])/', '', $name);
 
         return $name;
     }
