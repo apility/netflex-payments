@@ -29,7 +29,7 @@ class PaymentController extends Controller implements PaymentControllerContract
 
         /** @var Order $order */
         $payment = $this->createNewPayment($order, $processor);
-        event(new PaymentCreated($order, $payment, $processor));
+
         return $payment->pay();
     }
 
