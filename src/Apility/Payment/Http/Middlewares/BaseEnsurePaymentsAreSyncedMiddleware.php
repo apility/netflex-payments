@@ -2,11 +2,10 @@
 
 namespace Apility\Payment\Http\Middlewares;
 
-use Closure;
-
+use Apility\Payment\Events\OrderCompleted;
 use Apility\Payment\Facades\Payment;
 use Apility\Payment\Facades\Router;
-
+use Closure;
 use Illuminate\Http\Request;
 use Netflex\Commerce\Contracts\Order;
 
@@ -41,6 +40,7 @@ abstract class BaseEnsurePaymentsAreSyncedMiddleware
                 if ($order->canBeCompleted()) {
                     $order->completeOrder();
                     $order->refreshOrder();
+                    event(new OrderCompleted($order));
                     return redirect(Router::route('receipt', ['order' => $order], false));
                 }
             }

@@ -2,21 +2,18 @@
 
 namespace Apility\Payment\Http\Controllers;
 
-use Exception;
-
 use Apility\Payment\Contracts\Payment as PaymentContract;
-use Apility\Payment\Contracts\PaymentProcessor;
-use Apility\Payment\Facades\Payment;
-
-use Illuminate\Routing\Controller;
-
 use Apility\Payment\Contracts\PaymentController as PaymentControllerContract;
-
+use Apility\Payment\Contracts\PaymentProcessor;
+use Apility\Payment\Events\OrderCompleted;
+use Apility\Payment\Events\PaymentCreated;
+use Apility\Payment\Facades\Payment;
 use Apility\Payment\Facades\Router;
 use Apility\Payment\Requests\PaymentCallbackRequest;
 use Apility\Payment\Requests\PaymentRequest;
+use Exception;
+use Illuminate\Routing\Controller;
 use Netflex\Commerce\Contracts\Order as OrderContract;
-
 use Netflex\Commerce\Order;
 use Netflex\Render\PDF;
 
@@ -31,8 +28,9 @@ class PaymentController extends Controller implements PaymentControllerContract
         $processor = $request->getPaymentProcessor();
 
         /** @var Order $order */
-        return $this->createNewPayment($order, $processor)
-            ->pay();
+        $payment = $this->createNewPayment($order, $processor);
+        event(new PaymentCreated($order, $payment, $processor));
+        return $payment->pay();
     }
 
     public function onCallback(Order $order, PaymentContract $payment)
@@ -62,6 +60,7 @@ class PaymentController extends Controller implements PaymentControllerContract
             if ($order->canBeCompleted()) {
                 $order->completeOrder();
                 $order->refreshOrder();
+                event(new OrderCompleted($order));
             }
         }
 

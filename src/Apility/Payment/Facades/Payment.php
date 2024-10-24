@@ -4,10 +4,12 @@ namespace Apility\Payment\Facades;
 
 use Apility\Payment\Contracts\Payment as PaymentContract;
 use Apility\Payment\Contracts\PaymentProcessor;
+use Apility\Payment\Events\PaymentCancelled;
+use Apility\Payment\Events\PaymentCreated;
 use Apility\Payment\Processors\AbstractProcessor;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Facade;
 use Netflex\Commerce\Contracts\Order;
 use Netflex\Commerce\Contracts\Payment as CommercePayment;
 
@@ -30,23 +32,27 @@ class Payment extends Facade
     public static function cancelPendingPayments(Order $order): int
     {
         return collect($order->getOrderPayments())
-            ->map(fn (CommercePayment $pay) => Payment::resolve($pay))
+            ->map(fn(CommercePayment $pay) => Payment::resolve($pay))
             ->filter()
-            ->reject(fn (PaymentContract $pay) => $pay->isLocked())
+            ->reject(fn(PaymentContract $pay) => $pay->isLocked())
             ->each(function (PaymentContract $pay) use ($order) {
                 $pay->cancel();
+                event(new PaymentCancelled($order, $pay, $pay->getProcessor()));
                 $order->updatePayment($pay);
+
                 return $pay;
             })
             ->count();
     }
 
-    public static function processor(string $processor): ?PaymentProcessor
+    public static function processor(?string $processor = null): ?PaymentProcessor
     {
+
+        $processor = $processor ?: config('payment.default');
+
         $processor = App::make('payment.processors.' . $processor);
 
-        return new class($processor) extends AbstractProcessor
-        {
+        return new class($processor) extends AbstractProcessor {
             protected PaymentProcessor $processor;
 
             public function __construct(PaymentProcessor $processor)
@@ -69,7 +75,7 @@ class Payment extends Facade
                 $payment = $this->processor->create($order, $options);
                 $order->setOrderData('paymentId', $payment->getPaymentId());
                 $order->setOrderData('paymentProcessor', $this->getProcessor());
-
+                event(new PaymentCreated($order, $payment, $this->processor));
                 return $payment;
             }
 
@@ -100,4 +106,33 @@ class Payment extends Facade
 
         return $payment;
     }
+
+
+    public static function find(string $paymentId, ?PaymentProcessor $paymentProcessor): ?PaymentContract
+    {
+        return ($paymentProcessor ?? static::processor())->find($paymentId);
+    }
+
+
+    public static function cancel(Order $order, string $paymentId, ?PaymentProcessor $paymentProcessor): bool
+    {
+        if (collect($order->getOrderPayments())->where('transaction_id', '=', $paymentId)->count() == 0) {
+            return false;
+        }
+
+        $paymentProcessor = $paymentProcessor ?? static::processor();
+        $payment = $paymentProcessor->find($paymentId);
+        if (!$payment) {
+            return false;
+        }
+        $wasCancelled = $payment->cancel();
+
+        if ($wasCancelled) {
+            $payment = $paymentProcessor->find($paymentId);
+            event(new PaymentCancelled($order, $payment, $paymentProcessor));
+        }
+
+        return $wasCancelled;
+    }
+
 }
