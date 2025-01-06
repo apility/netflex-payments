@@ -50,8 +50,8 @@ trait CreatesNetsEasyPayments
                 'email' => $order->getOrderCustomerEmail(),
                 'phoneNumber' => $this->getNetsEasyOrderPhoneNumberPayload($order),
                 'privatePerson' => [
-                    'firstName' => $order->getOrderCustomerFirstname(),
-                    'lastName' => $order->getOrderCustomerSurname(),
+                    'firstName' => substr($order->getOrderCustomerFirstname(), 0, 128),
+                    'lastName' => substr($order->getOrderCustomerSurname(), 0, 128),
                 ]
             ]),
             'appearance' => [
