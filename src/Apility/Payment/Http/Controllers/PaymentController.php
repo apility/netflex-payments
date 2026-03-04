@@ -122,7 +122,7 @@ class PaymentController extends Controller implements PaymentControllerContract
     /**
      * @throws Exception
      */
-    private function createNewPayment(OrderContract $order, PaymentProcessor $processor = null, array $options = []): PaymentContract
+    protected function createNewPayment(OrderContract $order, PaymentProcessor $processor = null, array $options = []): PaymentContract
     {
         Payment::cancelPendingPayments($order);
 
