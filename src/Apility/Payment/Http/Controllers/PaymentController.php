@@ -6,7 +6,6 @@ use Apility\Payment\Contracts\Payment as PaymentContract;
 use Apility\Payment\Contracts\PaymentController as PaymentControllerContract;
 use Apility\Payment\Contracts\PaymentProcessor;
 use Apility\Payment\Events\OrderCompleted;
-use Apility\Payment\Events\PaymentCreated;
 use Apility\Payment\Facades\Payment;
 use Apility\Payment\Facades\Router;
 use Apility\Payment\Requests\PaymentCallbackRequest;
@@ -123,11 +122,11 @@ class PaymentController extends Controller implements PaymentControllerContract
     /**
      * @throws Exception
      */
-    private function createNewPayment(OrderContract $order, PaymentProcessor $processor = null): PaymentContract
+    private function createNewPayment(OrderContract $order, PaymentProcessor $processor = null, array $options = []): PaymentContract
     {
         Payment::cancelPendingPayments($order);
 
-        $payment = $this->createPayment($order, $processor, []);
+        $payment = $this->createPayment($order, $processor, $options);
         $processor = $payment->getProcessor();
 
         $order->registerPayment($payment);
