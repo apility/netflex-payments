@@ -88,6 +88,11 @@ class Payment extends Facade
             {
                 return $this->processor->resolve($request);
             }
+
+            public function unwrap(): PaymentProcessor
+            {
+                return $this->processor;
+            }
         };
     }
 
