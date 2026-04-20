@@ -243,7 +243,7 @@ class NetsEasyPayment extends AbstractPayment
 
     public function isCancelled(): bool
     {
-        return $this->payment->terminated || $this->payment->summary && ($this->payment->summary->cancelledAmount ?? 0) > 0;
+        return $this->payment->terminated || $this->payment->summary && data_get($this->payment, 'summary.cancelledAmount', 0) > 0;
     }
 
     public function isLocked(): bool
