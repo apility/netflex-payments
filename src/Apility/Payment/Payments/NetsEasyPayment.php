@@ -282,4 +282,9 @@ class NetsEasyPayment extends AbstractPayment
 
         return 'pending';
     }
+
+    public function getPaymentAmount(): float
+    {
+        return max(0, parent::getPaymentAmount() - (data_get($this->payment, 'summary.cancelledAmount') / 100));
+    }
 }
